@@ -10,10 +10,20 @@ import {
 } from '../types';
 
 const initialState: AuthState = {
-  user: null,
+  //user: null,
+  //loading: false,
+  //error: null,
+  //isAuthenticated: false,
+  // PARA TESTES, REPOR O QUE ESTÁ COMENTADO ACIMA DEPOIS
+  user: {
+    id: 'TEST_USER_ID',
+    nome: 'TEST_USER',
+    email: 'TEST_USER_EMAIL',
+    created_at: '',
+  },
+  isAuthenticated: true,
   loading: false,
   error: null,
-  isAuthenticated: false,
 };
 
 // O reducer recebe o estado atual e a action, e retorna o novo estado
