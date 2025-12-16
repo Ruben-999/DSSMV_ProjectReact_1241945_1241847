@@ -1,117 +1,97 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { CategoryChip } from '../../components';
-import {
-  selectAllLembretes,
-  selectLembretesHoje,
-  selectLembretesConcluidos,
-  selectCategorias,
-  selectUserId,
-} from '../../redux/selectors';
-import { fetchCategorias } from '../../redux/actions/categoriaActions';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import CategoryChip from '../../components/CategoryChip';
+import StatsCard from '../../components/StatsCard';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/reducers';
 import { useNavigation } from '@react-navigation/native';
-import type { AppDispatch } from '../../redux/store/store';
 
-const userId = useSelector(selectUserId);
-const dispatch = useDispatch<AppDispatch>();
-useEffect(() => {
-  if (userId) {
-    dispatch(fetchCategorias(userId));
-  }
-}, [dispatch, userId]);
-const navigation = useNavigation();
+// Presentational-first Home screen. No data fetching or navigation here —
+// UI only, easy to integrate with Redux or navigation later.
+const categories = [
+  { id: '1', label: 'Work' },
+  { id: '2', label: 'Personal' },
+  { id: '3', label: 'Shopping' },
+  { id: '4', label: 'Health' },
+];
 
-const HomeScreen = () => {
-  // 🔹 Redux state
-  const lembretes = useSelector(selectAllLembretes);
-  const lembretesHoje = useSelector(selectLembretesHoje);
-  const lembretesConcluidos = useSelector(selectLembretesConcluidos);
-  const categorias = useSelector(selectCategorias);
+const stats = [
+  { id: 'Hoje', label: 'Hoje', value: 3 },
+  { id: 'Agendado', label: 'Agendado', value: 5 },
+  { id: 'Concluído', label: 'Concluído', value: 12 },
+];
 
-  // 🔹 FILTRO POR CATEGORIA (AQUI)
-  const lembretesFiltrados = activeCategoriaId
-  ? lembretes.filter(
-      lembrete => lembrete.categoriaId === activeCategoriaId
-    )
-  : lembretes;
-
-
-  // 🔹 UI state
-  const [activeCategoriaId, setActiveCategoriaId] = useState<string | null>(null);
-
- const dispatch = useDispatch<AppDispatch>();
-
-  // 🔹 Load categorias on mount
-  useEffect(() => {
-  if (userId) {
-    dispatch(fetchCategorias(userId));
-  }
-}, [dispatch, userId]);
+const HomeScreen: React.FC = () => {
+  // Local UI state only — keeps this component presentational and predictable.
+  const [selectedCategory, setSelectedCategory] = useState<string>(categories[0].id);
+  // Read the real count of listas from Redux store. Keeps component presentational
+  // while using global state as read-only input.
+  const listasCount = useSelector((state: RootState) => state.listas.items.length);
+  const navigation = useNavigation<any>();
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.logoutButton}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{lembretesHoje.length}</Text>
-            <Text style={styles.statLabel}>Hoje</Text>
-          </View>
-
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{lembretes.length}</Text>
-            <Text style={styles.statLabel}>Agendados</Text>
-          </View>
-        </View>
-
-        <View style={styles.statBoxLarge}>
-          <Text style={styles.statNumber}>{lembretesConcluidos.length}</Text>
-          <Text style={styles.statLabel}>Concluídos</Text>
-        </View>
+        <Text style={styles.greeting}>Olá</Text>
+        <Text style={styles.subtitle}>Bem-vindo de volta</Text>
       </View>
 
-      {/* Categorias */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Categorias</Text>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.categoryRow}>
-            <CategoryChip
-              label="Todas"
-              active={activeCategoriaId === null}
-              onPress={() => setActiveCategoriaId(null)}
-            />
-
-            {categorias.map(categoria => (
-              <CategoryChip
-                key={categoria.id}
-                label={categoria.name}
-                active={activeCategoriaId === categoria.id}
-                onPress={() => setActiveCategoriaId(categoria.id)}
-              />
-            ))}
-          </View>
+      <View style={styles.statsWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.statsScroll}
+        >
+          {stats.map((s) => (
+            <View key={s.id} style={styles.statsItem}>
+              <StatsCard value={s.value} label={s.label} />
+            </View>
+          ))}
         </ScrollView>
       </View>
 
-      {/* Botão Novo Lembrete */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>Categorias</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              // Navigate to CreateCategoria screen (presentational)
+              navigation.navigate('CreateCategoria');
+            }}
+            accessibilityLabel="Adicionar categoria"
+          >
+            <Text style={styles.addButtonText}>+</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsScroll}
+        >
+          {categories.map((c) => (
+            <CategoryChip
+              key={c.id}
+              label={c.label}
+              active={selectedCategory === c.id}
+              onPress={() => setSelectedCategory(c.id)}
+            />
+          ))}
+        </ScrollView>
+      </View>
+
       <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate('CreateLembrete' as never)}>
-        <Text style={styles.addButtonText}>+ Novo lembrete</Text>
+        style={styles.listasContainer}
+        onPress={() => navigation.navigate('ListsOverview')}
+        accessibilityLabel="Abrir listas"
+      >
+        <Text style={styles.listasTitle}>Listas</Text>
+        <View style={styles.listasBadge}>
+          <Text style={styles.listasBadgeText}>{listasCount}</Text>
+        </View>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -121,88 +101,90 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    padding: 16,
   },
-
+  content: {
+    padding: 16,
+    paddingBottom: 40,
+  },
   header: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
-
-  logoutButton: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#ff2d2d',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-
-  logoutText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-
-  statBox: {
-    backgroundColor: '#111',
-    flex: 1,
-    marginRight: 8,
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-
-  statBoxLarge: {
-    backgroundColor: '#111',
-    marginTop: 12,
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-
-  statNumber: {
-    color: '#fff',
+  greeting: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#fff',
   },
-
-  statLabel: {
+  subtitle: {
     color: '#aaa',
-    marginTop: 4,
+    marginTop: 6,
   },
-
+  statsWrapper: {
+    marginBottom: 20,
+  },
+  statsScroll: {
+    paddingVertical: 4,
+    paddingRight: 16,
+  },
+  statsItem: {
+    width: 140,
+    marginRight: 12,
+  },
   section: {
-    marginTop: 24,
+    marginTop: 8,
   },
-
   sectionTitle: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    marginBottom: 8,
   },
-
-  categoryRow: {
+  chipsScroll: {
+    paddingVertical: 4,
+  },
+  sectionHeaderRow: {
     flexDirection: 'row',
-    marginTop: 12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
-
   addButton: {
-    position: 'absolute',
-    bottom: 24,
-    alignSelf: 'center',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#6c2cff',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
   addButtonText: {
     color: '#fff',
+    fontSize: 20,
+    lineHeight: 20,
+    fontWeight: '700',
+  },
+  listasContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    backgroundColor: '#0b0b0b',
+    borderRadius: 12,
+    marginTop: 16,
+  },
+  listasTitle: {
+    color: '#fff',
+    fontWeight: '600',
     fontSize: 16,
-    fontWeight: 'bold',
+  },
+  listasBadge: {
+    minWidth: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#6c2cff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  listasBadgeText: {
+    color: '#fff',
+    fontWeight: '700',
   },
 });
