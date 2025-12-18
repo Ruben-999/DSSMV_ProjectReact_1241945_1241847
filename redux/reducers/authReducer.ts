@@ -27,12 +27,20 @@ export const authReducer = (state = initialState, action: any): AuthState => {
         error: null,
       };
     case LOGIN_SUCCESS:
-    case REGISTER_SUCCESS:
       return {
         ...state,
         loading: false,
         user: action.payload,
         isAuthenticated: true,
+        error: null,
+      };
+    case REGISTER_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        // Guardamos o user mas não mudamos o isAuthenticated para true.
+        // O user terá de fazer login manual.x
+        isAuthenticated: false, 
         error: null,
       };
     case LOGIN_FAILURE:
