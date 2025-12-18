@@ -43,10 +43,17 @@ export const loginUser = (email: string, pass: string) => {
 
 export const logoutUser = () => {
   return async (dispatch: Dispatch) => {
-    await apiAuth.signOut();
-    dispatch({ type: LOGOUT });
+    try {
+      // Tenta avisar o Supabase que saímos
+      await apiAuth.signOut();
+    } catch (error) {
+      console.error("Erro ao fazer logout no backend:", error);
+    } finally {
+      // Isto garante que o utilizador volta ao ecrã inicial.
+      dispatch({ type: LOGOUT });
+    }
   };
-};
+}
 
 export const registerUser = (email: string, pass: string, name: string) => {
   return async (dispatch: Dispatch) => {

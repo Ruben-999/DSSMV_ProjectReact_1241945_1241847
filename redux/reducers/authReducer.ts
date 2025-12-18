@@ -9,24 +9,14 @@ import {
   LOGOUT 
 } from '../types';
 
+//Estado inicial limpo 
 const initialState: AuthState = {
-  //user: null,
-  //loading: false,
-  //error: null,
-  //isAuthenticated: false,
-  // PARA TESTES, REPOR O QUE ESTÁ COMENTADO ACIMA DEPOIS
-  user: {
-    id: 'TEST_USER_ID',
-    nome: 'TEST_USER',
-    email: 'TEST_USER_EMAIL',
-    created_at: '',
-  },
-  isAuthenticated: true,
+  user: null,
   loading: false,
   error: null,
+  isAuthenticated: false,
 };
 
-// O reducer recebe o estado atual e a action, e retorna o novo estado
 export const authReducer = (state = initialState, action: any): AuthState => {
   switch (action.type) {
     case LOGIN_REQUEST:
@@ -36,6 +26,7 @@ export const authReducer = (state = initialState, action: any): AuthState => {
         loading: true,
         error: null,
       };
+
     case LOGIN_SUCCESS:
       return {
         ...state,
@@ -44,15 +35,16 @@ export const authReducer = (state = initialState, action: any): AuthState => {
         isAuthenticated: true,
         error: null,
       };
+
     case REGISTER_SUCCESS:
       return {
         ...state,
         loading: false,
-        // Guardamos o user mas não mudamos o isAuthenticated para true.
-        // O user terá de fazer login manual.x
+        // Mantemos false para obrigar ao login manual após registo
         isAuthenticated: false, 
         error: null,
       };
+
     case LOGIN_FAILURE:
     case REGISTER_FAILURE:
       return {
@@ -61,10 +53,12 @@ export const authReducer = (state = initialState, action: any): AuthState => {
         error: action.payload,
         isAuthenticated: false,
       };
+
     case LOGOUT:
       return {
-        ...initialState, // Reseta tudo
+        ...initialState, 
       };
+
     default:
       return state;
   }
