@@ -1,4 +1,4 @@
-import { User, Lembrete, Lista, Categoria } from '../redux/types'; 
+import { User, Lembrete, Lista, Categoria, LembreteInput } from '../redux/types'; 
 
 // Interface genérica de resposta para manter consistência
 export interface ServiceResponse<T> {
@@ -19,7 +19,7 @@ export interface ILembreteService {
   getLembretes(userId: string): Promise<ServiceResponse<Lembrete[]>>;
   
   // Criar (recebe tudo menos id e created_at)
-  createLembrete(lembrete: Omit<Lembrete, 'id' | 'created_at'>): Promise<ServiceResponse<Lembrete>>;
+  createLembrete(lembrete: LembreteInput): Promise<ServiceResponse<Lembrete>>;
   
   // Atualizar (recebe o ID e apenas os campos que mudaram - Partial)
   updateLembrete(id: string, updates: Partial<Lembrete>): Promise<ServiceResponse<Lembrete>>;

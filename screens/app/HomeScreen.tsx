@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../redux/reducers';
 import { useNavigation } from '@react-navigation/native';
 import { logoutUser } from '../../redux/actions/authActions'; // Ação de logout
+import { Ionicons } from '@expo/vector-icons'; // Importar Ícones
 
 // Componentes (Assumindo que eles existem e aceitam onPress/style)
 import CategoryChip from '../../components/CategoryChip';
@@ -117,6 +118,15 @@ const HomeScreen: React.FC = () => {
         </TouchableOpacity>
 
       </ScrollView>
+
+      {/* Botão para CRIAR LEMBRETE */}
+      <TouchableOpacity 
+        style={styles.fab} 
+        onPress={() => navigation.navigate('CreateLembrete')}
+      >
+        <Ionicons name="add" size={32} color="#fff" />
+      </TouchableOpacity>
+
     </SafeAreaView>
   );
 };
@@ -235,4 +245,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 12,
   },
+
+  fab: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#6c2cff', // Roxo principal
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5, // Sombra Android
+    shadowColor: '#6c2cff', // Sombra iOS
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  }
+
 });

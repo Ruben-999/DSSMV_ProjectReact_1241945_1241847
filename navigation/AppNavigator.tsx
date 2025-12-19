@@ -18,13 +18,7 @@ import CreateCategoriaScreen from '../screens/app/CreateCategoriaScreen';
 import CreateListaScreen from '../screens/app/CreateListaScreen';
 import ListsOverviewScreen from '../screens/app/ListsOverviewScreen';
 import ListDetailsScreen from '../screens/app/ListDetailsScreen';
-
-// Placeholder temporário para o CreateLembrete (para não dar erro de build)
-const CreateLembreteScreen: React.FC = () => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text>CreateLembreteScreen (placeholder)</Text>
-  </View>
-);
+import CreateLembreteScreen from '../screens/lembretes/CreateLembreteScreen'
 
 const Stack = createNativeStackNavigator();
 
