@@ -224,7 +224,7 @@ const CreateLembreteScreen = () => {
                         <TouchableOpacity style={styles.modalItem} onPress={() => { onSelect(item.id); onClose(); }}>
                             {item.cor_hex && <View style={[styles.colorDot, { backgroundColor: item.cor_hex }]} />}
                             <Text style={styles.modalItemText}>{item.nome}</Text>
-                            <Ionicons name="chevron-forward" size={20} color="#666" />
+                            <Ionicons name="chevron-forward" size={20} color="#585858ff" />
                         </TouchableOpacity>
                     )}
                 />
@@ -246,8 +246,8 @@ const CreateLembreteScreen = () => {
       <ScrollView contentContainerStyle={styles.content}>
         
         <View style={styles.inputGroup}>
-          <TextInput style={styles.titleInput} placeholder="O que precisas fazer?" placeholderTextColor="#666" value={titulo} onChangeText={setTitulo} autoFocus />
-          <TextInput style={styles.descInput} placeholder="Descrição / Notas" placeholderTextColor="#666" value={descricao} onChangeText={setDescricao} multiline />
+          <TextInput style={styles.titleInput} placeholder="O que precisas fazer?" placeholderTextColor="#636363ff" value={titulo} onChangeText={setTitulo} autoFocus />
+          <TextInput style={styles.descInput} placeholder="Descrição / Notas" placeholderTextColor="#5b5b5bff" value={descricao} onChangeText={setDescricao} multiline />
         </View>
 
         <View style={styles.selectorsRow}>
