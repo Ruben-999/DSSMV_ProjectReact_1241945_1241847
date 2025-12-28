@@ -1,82 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context'; // Proteção contra notch
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../redux/reducers';
 import { useNavigation } from '@react-navigation/native';
-import { logoutUser } from '../../redux/actions/authActions';
-import { fetchLembretes } from '../../redux/actions/lembreteActions';
-import { Ionicons } from '@expo/vector-icons';
+import { logoutUser } from '../../redux/actions/authActions'; // Ação de logout
 
-// Componentes
+// Componentes (Assumindo que eles existem e aceitam onPress/style)
 import CategoryChip from '../../components/CategoryChip';
 import StatsCard from '../../components/StatsCard';
 
-const categoriesPlaceholder = [
+const categories = [
   { id: '1', label: 'Trabalho' },
   { id: '2', label: 'Pessoal' },
   { id: '3', label: 'Compras' },
   { id: '4', label: 'Saúde' },
 ];
 
+const stats = [
+  { id: 'hoje', label: 'Hoje', value: 3, color: '#fca5a5' }, // Exemplo de cor
+  { id: 'agendado', label: 'Agendados', value: 5, color: '#fde047' },
+  { id: 'concluido', label: 'Concluídos', value: 12, color: '#86efac' },
+  { id: 'todos', label: 'Todos', value: 20, color: '#93c5fd' }, // Novo bloco
+];
+
 const HomeScreen: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string>(categoriesPlaceholder[0].id);
+  const [selectedCategory, setSelectedCategory] = useState<string>(categories[0].id);
 
-  // 1. Dados do Redux
+  // Redux Data
   const user = useSelector((state: RootState) => state.auth.user);
-  const { items: lembretes } = useSelector((state: RootState) => state.lembretes);
   const listasCount = useSelector((state: RootState) => state.listas.items.length);
-
-  // Categorias
-  const categoriasReais = useSelector((state: RootState) => state.categorias?.items) || [];
-  const categoriesDisplay = categoriasReais.length > 0 ? categoriasReais.map(c => ({id: c.id.toString(), label: c.nome})) : categoriesPlaceholder;
 
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
-
-  // 2. BUSCAR DADOS
-  useEffect(() => {
-    if (user?.id) {
-        dispatch(fetchLembretes(user.id) as any);
-    }
-  }, [dispatch, user?.id]);
-
-  // 3. ESTATÍSTICAS
-  const hojeString = new Date().toISOString().split('T')[0];
-
-  const countConcluidos = lembretes.filter(l => l.concluido).length;
-  const countTodos = lembretes.filter(l => !l.concluido).length;
-
-  const countHoje = lembretes.filter(l => {
-    if (l.concluido || !l.data_hora) return false;
-    return l.data_hora.split('T')[0] === hojeString;
-  }).length;
-
-  const countAgendados = lembretes.filter(l => {
-    if (l.concluido || !l.data_hora) return false;
-    return l.data_hora.split('T')[0] !== hojeString;
-  }).length;
-
-  const stats = [
-    { id: 'hoje', label: 'Hoje', value: countHoje, color: '#fca5a5' },
-    { id: 'agendado', label: 'Agendados', value: countAgendados, color: '#fde047' },
-    { id: 'concluido', label: 'Concluídos', value: countConcluidos, color: '#86efac' },
-    { id: 'todos', label: 'Todos', value: countTodos, color: '#93c5fd' },
-  ];
-
-  // Navegação
-  const handleStatPress = (statId: string, label: string) => {
-    navigation.navigate('LembretesList', {
-      filterType: statId,
-      filterTitle: label
-    });
-  };
 
   const handleLogout = () => {
     Alert.alert("Sair", "Tens a certeza?", [
       { text: "Cancelar", style: "cancel" },
       { text: "Sair", onPress: () => dispatch(logoutUser() as any) }
     ]);
+  };
+
+  const handleStatPress = (statId: string) => {
+    console.log(`Clicou em: ${statId}`);
+    // Futuramente: navigation.navigate('LembretesList', { filter: statId });
   };
 
   return (
@@ -89,36 +56,45 @@ const HomeScreen: React.FC = () => {
             <Text style={styles.greeting}>Olá, {user?.nome || 'Utilizador'}</Text>
             <Text style={styles.subtitle}>Bem-vindo de volta</Text>
           </View>
+          {/* Botão de Logout Temporário para testes */}
           <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Ionicons name="log-out-outline" size={20} color="#ff6b6b" />
+            <Text style={styles.logoutText}>Sair</Text>
           </TouchableOpacity>
         </View>
 
-        {/* GRID STATS */}
+        {/* GRID 2x2 DE STATS */}
         <View style={styles.gridContainer}>
           {stats.map((s) => (
             <TouchableOpacity
               key={s.id}
               style={styles.gridItem}
+              onPress={() => handleStatPress(s.id)}
               activeOpacity={0.7}
-              onPress={() => handleStatPress(s.id, s.label)}
             >
+              {/* Assumindo que o StatsCard aceita estilos ou ajusta-se ao pai */}
               <StatsCard value={s.value} label={s.label} />
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* CATEGORIAS */}
+        {/* SECÇÃO CATEGORIAS */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Categorias</Text>
-            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('CreateCategoria')}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => navigation.navigate('CreateCategoria')}
+            >
               <Text style={styles.addButtonText}>+</Text>
             </TouchableOpacity>
           </View>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
-            {categoriesDisplay.map((c) => (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipsScroll}
+          >
+            {categories.map((c) => (
               <CategoryChip
                 key={c.id}
                 label={c.label}
@@ -129,8 +105,11 @@ const HomeScreen: React.FC = () => {
           </ScrollView>
         </View>
 
-        {/* LISTAS */}
-        <TouchableOpacity style={styles.listasContainer} onPress={() => navigation.navigate('ListsOverview')}>
+        {/* BOTÃO LISTAS */}
+        <TouchableOpacity
+          style={styles.listasContainer}
+          onPress={() => navigation.navigate('ListsOverview')}
+        >
           <Text style={styles.listasTitle}>Minhas Listas</Text>
           <View style={styles.listasBadge}>
             <Text style={styles.listasBadgeText}>{listasCount}</Text>
@@ -138,19 +117,12 @@ const HomeScreen: React.FC = () => {
         </TouchableOpacity>
 
       </ScrollView>
-
-      {/* FAB (Botão Lembretes) */}
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('CreateLembrete')}>
-        <Ionicons name="add" size={32} color="#fff" />
-      </TouchableOpacity>
-
     </SafeAreaView>
   );
 };
 
 export default HomeScreen;
 
-// Os estilos mantêm-se iguais
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -158,7 +130,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-    paddingBottom: 100,
+    paddingBottom: 40,
   },
   header: {
     marginBottom: 24,
@@ -180,6 +152,11 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: '#2a2a2a',
     borderRadius: 8,
+  },
+  logoutText: {
+    color: '#ff6b6b',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
 
   // Grid Styles
@@ -258,5 +235,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 12,
   },
-  fab: { position: 'absolute', bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: '#6c2cff', justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#6c2cff', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4 }
 });
