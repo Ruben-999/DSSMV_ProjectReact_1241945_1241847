@@ -28,10 +28,11 @@ export const listaReducer = (state = initialState, action: any): ListaState => {
       return { ...state, loading: false, items: action.payload };
 
     case ADD_LISTA_SUCCESS:
-      return { 
-        ...state, 
-        loading: false, 
-        items: [...state.items, action.payload] // Adiciona ao fim da lista
+      const newItem = { ...action.payload, is_default: action.payload.is_default ?? false };
+      return {
+        ...state,
+        loading: false,
+        items: [...state.items, newItem] // Adiciona ao fim da lista
       };
 
 

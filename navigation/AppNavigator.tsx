@@ -14,10 +14,10 @@ import RegisterScreen from '../screens/auth/RegisterScreen';
 
 // --- SCREENS DA APP ---
 import HomeScreen from '../screens/app/HomeScreen';
-import CreateCategoriaScreen from '../screens/app/CreateCategoriaScreen';
-import CreateListaScreen from '../screens/app/CreateListaScreen';
-import ListsOverviewScreen from '../screens/app/ListsOverviewScreen';
-import ListDetailsScreen from '../screens/app/ListDetailsScreen';
+import CreateCategoriaScreen from '../screens/Categorias/CreateCategoriaScreen';
+import CreateListaScreen from '../screens/List/CreateListaScreen';
+import ListsOverviewScreen from '../screens/List/ListsOverviewScreen';
+import ListDetailsScreen from '../screens/List/ListDetailsScreen';
 
 // Placeholder temporário para o CreateLembrete (para não dar erro de build)
 const CreateLembreteScreen: React.FC = () => (
@@ -29,9 +29,9 @@ const CreateLembreteScreen: React.FC = () => (
 const Stack = createNativeStackNavigator();
 
 export const AppNavigator = () => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth); 
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-  
+
   // Estado local para o splash screen / verificação de sessão
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
@@ -57,7 +57,7 @@ export const AppNavigator = () => {
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size="large" color="#007AFF" />
       </View>
-    ); 
+    );
   }
 
   return (

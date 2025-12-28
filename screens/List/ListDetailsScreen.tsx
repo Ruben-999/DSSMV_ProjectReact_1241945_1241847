@@ -5,10 +5,13 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../redux/store/store';
 import { RootState } from '../../redux/reducers';
+import { updateLembrete } from '../../redux/actions/lembreteActions';
 
 // Presentational List Details screen. Reads list and reminders from Redux.
 // No side-effects or data fetching here — expects data to be available.
@@ -16,6 +19,7 @@ import { RootState } from '../../redux/reducers';
 const ListDetailsScreen: React.FC = () => {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  const dispatch = useAppDispatch();
   const { listaId } = route.params || {};
 
   const lista = useSelector((s: RootState) =>
@@ -26,10 +30,30 @@ const ListDetailsScreen: React.FC = () => {
     s.lembretes.items.filter((lm) => String(lm.lista_id) === String(listaId))
   );
 
+  const handleRemoveReminder = (reminder: any) => {
+    Alert.alert(
+      'Remover Lembrete',
+      `Remover "${reminder.titulo}" desta lista?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Remover', style: 'destructive', onPress: () => dispatch(updateLembrete(String(reminder.id), { lista_id: null })) },
+      ]
+    );
+  };
+
   const renderItem = ({ item }: { item: any }) => (
     <View style={styles.reminderRow}>
-      <Text style={styles.reminderTitle}>{item.titulo}</Text>
-      {item.descricao ? <Text style={styles.reminderSubtitle}>{item.descricao}</Text> : null}
+      <View style={styles.reminderContent}>
+        <Text style={styles.reminderTitle}>{item.titulo}</Text>
+        {item.descricao ? <Text style={styles.reminderSubtitle}>{item.descricao}</Text> : null}
+      </View>
+      <TouchableOpacity
+        style={styles.removeButton}
+        onPress={() => handleRemoveReminder(item)}
+        accessibilityLabel={`Remover lembrete ${item.titulo}`}
+      >
+        <Text style={styles.removeText}>X</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -42,12 +66,15 @@ const ListDetailsScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, lista.cor_hex ? { backgroundColor: lista.cor_hex } : {}]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.back}>Voltar</Text>
         </TouchableOpacity>
         <Text style={styles.title}>{lista.nome}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('EditLista', { listaId })}>
+          <Text style={styles.edit}>Editar</Text>
+        </TouchableOpacity>
       </View>
 
       {lembretes.length === 0 ? (
@@ -80,13 +107,17 @@ export default ListDetailsScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
-  header: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#111' },
-  back: { color: '#6c2cff', marginBottom: 8 },
+  header: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#111', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  back: { color: '#6c2cff' },
   title: { color: '#fff', fontSize: 20, fontWeight: '700' },
+  edit: { color: '#6c2cff' },
   listContent: { padding: 16, paddingBottom: 120 },
-  reminderRow: { padding: 12, backgroundColor: '#0b0b0b', borderRadius: 8 },
+  reminderRow: { flexDirection: 'row', alignItems: 'center', padding: 12, backgroundColor: '#0b0b0b', borderRadius: 8 },
+  reminderContent: { flex: 1 },
   reminderTitle: { color: '#fff', fontWeight: '600' },
   reminderSubtitle: { color: '#9a9a9a', marginTop: 4 },
+  removeButton: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center', marginLeft: 8 },
+  removeText: { color: '#ff3b30', fontSize: 18, fontWeight: '700' },
   separator: { height: 12 },
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   emptyTitle: { color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 8 },

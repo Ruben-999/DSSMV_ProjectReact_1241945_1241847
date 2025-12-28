@@ -26,11 +26,11 @@ const stats = [
 
 const HomeScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>(categories[0].id);
-  
+
   // Redux Data
   const user = useSelector((state: RootState) => state.auth.user);
   const listasCount = useSelector((state: RootState) => state.listas.items.length);
-  
+
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
 
@@ -49,7 +49,7 @@ const HomeScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView contentContainerStyle={styles.content}>
-        
+
         {/* HEADER */}
         <View style={styles.header}>
           <View>
@@ -65,8 +65,8 @@ const HomeScreen: React.FC = () => {
         {/* GRID 2x2 DE STATS */}
         <View style={styles.gridContainer}>
           {stats.map((s) => (
-            <TouchableOpacity 
-              key={s.id} 
+            <TouchableOpacity
+              key={s.id}
               style={styles.gridItem}
               onPress={() => handleStatPress(s.id)}
               activeOpacity={0.7}
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
   },
-  
+
   // Grid Styles
   gridContainer: {
     flexDirection: 'row',

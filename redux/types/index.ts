@@ -93,8 +93,8 @@ export interface Lista {
   user_id: string;
   nome: string;
   is_default: boolean; // Para saber se é a lista "Default" que não deve ser apagada
-  descricao?: string;
-  cor_hex?: string;
+  descricao?: string | null;
+  cor_hex?: string | null;
   created_at: string;
 }
 

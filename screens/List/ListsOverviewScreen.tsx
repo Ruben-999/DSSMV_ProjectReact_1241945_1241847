@@ -5,10 +5,13 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../redux/store/store';
 import { RootState } from '../../redux/reducers';
 import { useNavigation } from '@react-navigation/native';
+import { deleteLista } from '../../redux/actions/listaActions';
 
 // Presentational Lists Overview Screen
 // Reuses Redux shape: `state.listas.items` and `state.lembretes.items`.
@@ -17,9 +20,26 @@ import { useNavigation } from '@react-navigation/native';
 
 const ListsOverviewScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const dispatch = useAppDispatch();
 
   const listas = useSelector((s: RootState) => s.listas.items);
   const lembretes = useSelector((s: RootState) => s.lembretes.items);
+  const user = useSelector((s: RootState) => s.auth.user);
+
+  const handleDeleteLista = (lista: any) => {
+    if (lista.is_default) {
+      Alert.alert('Erro', 'Não é possível apagar a lista padrão.');
+      return;
+    }
+    Alert.alert(
+      'Apagar Lista',
+      `Tem certeza que deseja apagar a lista "${lista.nome}"?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Apagar', style: 'destructive', onPress: () => dispatch(deleteLista(String(lista.id))) },
+      ]
+    );
+  };
 
   const renderItem = ({ item }: { item: any }) => {
     const remindersCount = lembretes.filter(
@@ -27,22 +47,31 @@ const ListsOverviewScreen: React.FC = () => {
     ).length;
 
     return (
-      <TouchableOpacity
-        style={styles.row}
-        onPress={() => navigation.navigate('ListDetails', { listaId: item.id })}
-        accessibilityLabel={`Abrir lista ${item.nome}`}
-      >
-        <View style={styles.rowText}>
-          <Text style={styles.title}>{item.nome}</Text>
-          {item.descricao ? (
-            <Text style={styles.subtitle}>{item.descricao}</Text>
-          ) : null}
-        </View>
+      <View style={[styles.row, item.cor_hex ? { backgroundColor: item.cor_hex } : {}]}>
+        <TouchableOpacity
+          style={styles.rowTouchable}
+          onPress={() => navigation.navigate('ListDetails', { listaId: item.id })}
+          accessibilityLabel={`Abrir lista ${item.nome}`}
+        >
+          <View style={styles.rowText}>
+            <Text style={styles.title}>{item.nome}</Text>
+            {item.descricao ? (
+              <Text style={styles.subtitle}>{item.descricao}</Text>
+            ) : null}
+          </View>
 
-        <View style={styles.meta}>
-          <Text style={styles.count}>{remindersCount}</Text>
-        </View>
-      </TouchableOpacity>
+          <View style={styles.meta}>
+            <Text style={styles.count}>{remindersCount}</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDeleteLista(item)}
+          accessibilityLabel={`Apagar lista ${item.nome}`}
+        >
+          <Text style={styles.deleteText}>X</Text>
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -96,13 +125,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#0b0b0b',
     borderRadius: 10,
   },
+  rowTouchable: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowText: { flex: 1, paddingRight: 8 },
   title: { color: '#fff', fontSize: 16, fontWeight: '600' },
   subtitle: { color: '#9a9a9a', marginTop: 4 },
   meta: { width: 36, alignItems: 'center' },
   count: { color: '#fff', fontWeight: '700' },
+  deleteButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginLeft: 8 },
+  deleteText: { color: '#ff3b30', fontSize: 18, fontWeight: '700' },
   separator: { height: 12 },
-  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: '#000' },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 8 },
   emptyText: { color: '#999', textAlign: 'center', marginBottom: 16 },
   createButton: { backgroundColor: '#6c2cff', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
