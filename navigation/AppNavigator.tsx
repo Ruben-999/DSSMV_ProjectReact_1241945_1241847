@@ -15,10 +15,10 @@ import RegisterScreen from '../screens/auth/RegisterScreen';
 
 // --- SCREENS APP ---
 import HomeScreen from '../screens/app/HomeScreen';
-import CreateCategoriaScreen from '../screens/app/CreateCategoriaScreen';
-import CreateListaScreen from '../screens/app/CreateListaScreen';
-import ListsOverviewScreen from '../screens/app/ListsOverviewScreen';
-import ListDetailsScreen from '../screens/app/ListDetailsScreen';
+import CreateCategoriaScreen from '../screens/Categorias/CreateCategoriaScreen';
+import CreateListaScreen from '../screens/List/CreateListaScreen';
+import ListsOverviewScreen from '../screens/List/ListsOverviewScreen';
+import ListDetailsScreen from '../screens/List/ListDetailsScreen';
 import CreateLembreteScreen from '../screens/lembretes/CreateLembreteScreen';
 import LembretesListScreen from '../screens/lembretes/LembretesListScreen';
 
