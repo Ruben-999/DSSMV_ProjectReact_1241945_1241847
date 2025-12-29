@@ -1,23 +1,31 @@
+// screens/lists/EditListScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../redux/store/store';
-import { updateLista } from '../../redux/actions/listaActions';
+
 import { RootState } from '../../redux/reducers';
+import { updateLista, deleteLista } from '../../redux/actions/listaActions';
 
-// Predefined color palette
-const COLOR_PALETTE = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-  '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2'
-];
+type RouteParams = {
+  listaId: string;
+};
 
-const EditListaScreen: React.FC = () => {
+const EditListScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const dispatch = useAppDispatch();
-  const { listaId } = route.params || {};
+
+  const { listaId } = route.params as RouteParams;
 
   const lista = useSelector((s: RootState) =>
     s.listas.items.find((l) => String(l.id) === String(listaId))
@@ -25,123 +33,185 @@ const EditListaScreen: React.FC = () => {
 
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [corHex, setCorHex] = useState('');
 
   useEffect(() => {
     if (lista) {
       setNome(lista.nome);
-      setDescricao(lista.descricao || '');
-      setCorHex(lista.cor_hex || '');
+      setDescricao(lista.descricao ?? '');
     }
   }, [lista]);
 
-  const handleSubmit = () => {
+  if (!lista) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.error}>Lista não encontrada.</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const handleSave = () => {
     if (!nome.trim()) {
       Alert.alert('Erro', 'O nome da lista é obrigatório.');
       return;
     }
-    if (!lista) {
-      Alert.alert('Erro', 'Lista não encontrada.');
-      return;
-    }
-    const updates = {
-      nome: nome.trim(),
-      descricao: descricao.trim() || undefined,
-      cor_hex: corHex.trim() || undefined,
-    };
-    dispatch(updateLista(String(lista.id), updates));
+
+    dispatch(
+      updateLista(String(lista.id), {
+        nome: nome.trim(),
+        descricao: descricao.trim() || null,
+      })
+    );
+
     navigation.goBack();
   };
 
-  if (!lista) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Lista não encontrada</Text>
-      </View>
+  const handleDelete = () => {
+    if (lista.is_default) {
+      Alert.alert(
+        'Lista protegida',
+        'A lista default não pode ser eliminada.'
+      );
+      return;
+    }
+
+    Alert.alert(
+      'Eliminar lista',
+      'Tens a certeza? Os lembretes não serão apagados.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => {
+            dispatch(deleteLista(String(lista.id)));
+            navigation.goBack();
+          },
+        },
+      ]
     );
-  }
+  };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Editar Lista</Text>
+    <SafeAreaView style={styles.container}>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.cancel}>Cancelar</Text>
+        </TouchableOpacity>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nome da lista"
-        placeholderTextColor="#999"
-        value={nome}
-        onChangeText={setNome}
-      />
+        <Text style={styles.title}>Editar Lista</Text>
 
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Descrição (opcional)"
-        placeholderTextColor="#999"
-        value={descricao}
-        onChangeText={setDescricao}
-        multiline
-        numberOfLines={3}
-      />
-
-      <Text style={styles.label}>Cor da Lista (opcional)</Text>
-      <View style={styles.colorPalette}>
-        <FlatList
-          data={COLOR_PALETTE}
-          keyExtractor={(item) => item}
-          numColumns={5}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.colorOption,
-                { backgroundColor: item },
-                corHex === item && styles.selectedColor,
-              ]}
-              onPress={() => setCorHex(item)}
-              accessibilityLabel={`Selecionar cor ${item}`}
-            />
-          )}
-        />
+        <TouchableOpacity onPress={handleSave}>
+          <Text style={styles.save}>Guardar</Text>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitText}>Salvar Alterações</Text>
-      </TouchableOpacity>
+      {/* CONTENT */}
+      <View style={styles.content}>
+        <Text style={styles.label}>Nome</Text>
+        <TextInput
+          style={styles.input}
+          value={nome}
+          onChangeText={setNome}
+          placeholder="Nome da lista"
+          placeholderTextColor="#666"
+        />
 
-      <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.cancelText}>Cancelar</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={styles.label}>Descrição</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={descricao}
+          onChangeText={setDescricao}
+          placeholder="Opcional"
+          placeholderTextColor="#666"
+          multiline
+        />
+
+        {!lista.is_default && (
+          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+            <Text style={styles.deleteText}>Eliminar Lista</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
-export default EditListaScreen;
+export default EditListScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  content: { padding: 16, paddingBottom: 40 },
-  title: { fontSize: 24, fontWeight: '700', color: '#fff', marginBottom: 20, textAlign: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+  },
+
+  error: {
+    color: '#fff',
+    padding: 16,
+    fontSize: 16,
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#222',
+  },
+
+  title: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+
+  cancel: {
+    color: '#aaa',
+    fontSize: 16,
+  },
+
+  save: {
+    color: '#22c55e',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  content: {
+    padding: 16,
+  },
+
+  label: {
+    color: '#aaa',
+    marginBottom: 6,
+    marginTop: 12,
+    fontSize: 14,
+  },
+
   input: {
-    backgroundColor: '#0b0b0b',
+    backgroundColor: '#1e1e1e',
     color: '#fff',
     padding: 12,
     borderRadius: 8,
-    marginBottom: 16,
     fontSize: 16,
   },
-  textArea: { height: 80, textAlignVertical: 'top' },
-  label: { color: '#fff', fontSize: 16, fontWeight: '600', marginBottom: 12 },
-  colorPalette: { marginBottom: 16 },
-  colorOption: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    margin: 5,
-    borderWidth: 2,
-    borderColor: 'transparent',
+
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
   },
-  selectedColor: { borderColor: '#fff' },
-  submitButton: { backgroundColor: '#6c2cff', padding: 16, borderRadius: 8, alignItems: 'center', marginBottom: 12 },
-  submitText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  cancelButton: { padding: 16, alignItems: 'center' },
-  cancelText: { color: '#999', fontSize: 16 },
+
+  deleteBtn: {
+    marginTop: 32,
+    padding: 14,
+    borderRadius: 8,
+    backgroundColor: '#7f1d1d',
+    alignItems: 'center',
+  },
+
+  deleteText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
+  },
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,15 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../redux/store/store';
 import { RootState } from '../../redux/reducers';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { deleteLista } from '../../redux/actions/listaActions';
 
-// Presentational Lists Overview Screen
-// Reuses Redux shape: `state.listas.items` and `state.lembretes.items`.
-// No side effects or data fetching here; the screen expects lists to be
-// provided by higher-level logic (e.g., an effect on a parent or bootstrapping).
+const ID_TODOS = 'todos';
 
 const ListsOverviewScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -24,131 +23,201 @@ const ListsOverviewScreen: React.FC = () => {
 
   const listas = useSelector((s: RootState) => s.listas.items);
   const lembretes = useSelector((s: RootState) => s.lembretes.items);
-  const user = useSelector((s: RootState) => s.auth.user);
+  const categoriaAtivaId = useSelector(
+    (s: RootState) => s.categorias.categoriaAtivaId
+  );
 
-  const handleDeleteLista = (lista: any) => {
-    if (lista.is_default) {
-      Alert.alert('Erro', 'Não é possível apagar a lista padrão.');
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // 🔹 FILTRO GLOBAL POR CATEGORIA
+  const lembretesFiltrados = useMemo(() => {
+    return categoriaAtivaId === ID_TODOS
+      ? lembretes
+      : lembretes.filter(
+          l => String(l.categoria_id) === String(categoriaAtivaId)
+        );
+  }, [lembretes, categoriaAtivaId]);
+
+  const getCount = (listaId: string) =>
+    lembretesFiltrados.filter(
+      l => String(l.lista_id) === String(listaId)
+    ).length;
+
+  const toggleSelect = (id: string, isDefault: boolean) => {
+    if (isDefault) {
+      Alert.alert(
+        'Ação inválida',
+        'A lista default não pode ser eliminada.'
+      );
       return;
     }
+
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const confirmBulkDelete = () => {
+    if (selectedIds.size === 0) {
+      exitSelectionMode();
+      return;
+    }
+
     Alert.alert(
-      'Apagar Lista',
-      `Tem certeza que deseja apagar a lista "${lista.nome}"?`,
+      'Eliminar listas',
+      `Eliminar ${selectedIds.size} lista(s)?`,
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Apagar', style: 'destructive', onPress: () => dispatch(deleteLista(String(lista.id))) },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => {
+            selectedIds.forEach(id =>
+              dispatch(deleteLista(id))
+            );
+            exitSelectionMode();
+          },
+        },
       ]
     );
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const remindersCount = lembretes.filter(
-      (l) => String(l.lista_id) === String(item.id)
-    ).length;
+    const id = String(item.id);
+    const isSelected = selectedIds.has(id);
+    const count = getCount(id);
 
     return (
-      <View style={[styles.row, item.cor_hex ? { backgroundColor: item.cor_hex } : {}]}>
-        <TouchableOpacity
-          style={styles.rowTouchable}
-          onPress={() => navigation.navigate('ListDetails', { listaId: item.id })}
-          accessibilityLabel={`Abrir lista ${item.nome}`}
-        >
-          <View style={styles.rowText}>
-            <Text style={styles.title}>{item.nome}</Text>
-            {item.descricao ? (
-              <Text style={styles.subtitle}>{item.descricao}</Text>
-            ) : null}
-          </View>
+      <TouchableOpacity
+        style={[
+          styles.card,
+          isSelected && styles.cardSelected,
+        ]}
+        onLongPress={() => {
+          if (!selectionMode) {
+            setSelectionMode(true);
+            toggleSelect(id, item.is_default);
+          }
+        }}
+        onPress={() => {
+          if (selectionMode) {
+            toggleSelect(id, item.is_default);
+          } else {
+            navigation.navigate('ListDetails', { listaId: item.id });
+          }
+        }}
+      >
+        <View>
+          <Text style={styles.cardTitle}>{item.nome}</Text>
+          <Text style={styles.cardCount}>
+            {count} lembrete(s)
+          </Text>
+        </View>
 
-          <View style={styles.meta}>
-            <Text style={styles.count}>{remindersCount}</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDeleteLista(item)}
-          accessibilityLabel={`Apagar lista ${item.nome}`}
-        >
-          <Text style={styles.deleteText}>X</Text>
-        </TouchableOpacity>
-      </View>
+        {!selectionMode && (
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color="#555"
+          />
+        )}
+      </TouchableOpacity>
     );
   };
 
-  if (!listas || listas.length === 0) {
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyTitle}>Nenhuma lista encontrada</Text>
-        <Text style={styles.emptyText}>Crie a sua primeira lista para começar.</Text>
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={() => navigation.navigate('CreateLista')}
-          accessibilityLabel="Criar nova lista"
-        >
-          <Text style={styles.createButtonText}>Criar lista</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Minhas Listas</Text>
+
+        {!selectionMode && (
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => navigation.navigate('CreateLista')}
+          >
+            <Ionicons name="add" size={22} color="#000" />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {selectionMode && (
+        <View style={styles.selectionBar}>
+          <Text style={styles.selectionText}>
+            {selectedIds.size} selecionada(s)
+          </Text>
+
+          <TouchableOpacity onPress={confirmBulkDelete}>
+            <Text style={styles.deleteAction}>Eliminar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={exitSelectionMode}>
+            <Text style={styles.cancelAction}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <FlatList
         data={listas}
-        keyExtractor={(i) => String(i.id)}
+        keyExtractor={i => String(i.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
-
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('CreateLista')}
-        accessibilityLabel="Adicionar nova lista"
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
 export default ListsOverviewScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  listContent: { padding: 16, paddingBottom: 120 },
-  row: {
+  container: { flex: 1, backgroundColor: '#121212' },
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
-    backgroundColor: '#0b0b0b',
-    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
   },
-  rowTouchable: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  rowText: { flex: 1, paddingRight: 8 },
-  title: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  subtitle: { color: '#9a9a9a', marginTop: 4 },
-  meta: { width: 36, alignItems: 'center' },
-  count: { color: '#fff', fontWeight: '700' },
-  deleteButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginLeft: 8 },
-  deleteText: { color: '#ff3b30', fontSize: 18, fontWeight: '700' },
-  separator: { height: 12 },
-  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: '#000' },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 8 },
-  emptyText: { color: '#999', textAlign: 'center', marginBottom: 16 },
-  createButton: { backgroundColor: '#6c2cff', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
-  createButtonText: { color: '#fff', fontWeight: '600' },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 30,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#6c2cff',
+  title: { color: '#fff', fontSize: 20, fontWeight: '700' },
+  addBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#22c55e',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  fabText: { color: '#fff', fontSize: 28, fontWeight: '700' },
+  selectionBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  selectionText: { color: '#fff', fontWeight: '600' },
+  deleteAction: { color: '#ef4444', fontWeight: '700' },
+  cancelAction: { color: '#aaa', fontWeight: '600' },
+  listContent: { padding: 16 },
+  card: {
+    backgroundColor: '#1e1e1e',
+    padding: 16,
+    borderRadius: 10,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardSelected: {
+    borderWidth: 1,
+    borderColor: '#ef4444',
+  },
+  cardTitle: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  cardCount: { color: '#aaa', marginTop: 6 },
+  separator: { height: 12 },
 });

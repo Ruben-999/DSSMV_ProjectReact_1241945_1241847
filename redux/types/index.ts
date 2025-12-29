@@ -133,10 +133,10 @@ export const DELETE_LISTA_FAILURE = 'DELETE_LISTA_FAILURE';
 //=========================================================================
 
 export interface Categoria {
-  id: string; // BIGINT
+  id: string; // BIGINT | 'todos'
   user_id: string;
   nome: string;
-  cor_hex?: string; // Opcional 
+  cor_hex?: string;
   created_at: string;
 }
 
@@ -144,11 +144,14 @@ export interface Categoria {
 
 export interface CategoriaState {
   items: Categoria[];
+  categoriaAtivaId: string;
   loading: boolean;
   error: string | null;
 }
 
 // --- ACTION TYPES ---
+
+export const SET_CATEGORIA_ATIVA = 'SET_CATEGORIA_ATIVA';
 
 // Fetch
 export const FETCH_CATEGORIAS_REQUEST = 'FETCH_CATEGORIAS_REQUEST';

@@ -21,6 +21,7 @@ import ListsOverviewScreen from '../screens/List/ListsOverviewScreen';
 import ListDetailsScreen from '../screens/List/ListDetailsScreen';
 import CreateLembreteScreen from '../screens/lembretes/CreateLembreteScreen';
 import LembretesListScreen from '../screens/lembretes/LembretesListScreen';
+import EditListScreen from '../screens/List/EditListaScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -65,7 +66,9 @@ export const AppNavigator = () => {
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="CreateLembrete" component={CreateLembreteScreen} />
             <Stack.Screen name="CreateCategoria" component={CreateCategoriaScreen} />
+            <Stack.Screen name="EditCategoria" component={CreateCategoriaScreen} />
             <Stack.Screen name="CreateLista" component={CreateListaScreen} />
+            <Stack.Screen name="EditList" component={EditListScreen} />
             <Stack.Screen name="ListsOverview" component={ListsOverviewScreen} />
             <Stack.Screen name="ListDetails" component={ListDetailsScreen} />
             <Stack.Screen name="LembretesList" component={LembretesListScreen} />
