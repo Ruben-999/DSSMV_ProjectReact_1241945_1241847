@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import { 
   View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Switch, 
   Platform, Modal, FlatList, Image, Alert 
@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/reducers';
 import { useDispatch } from 'react-redux';
 import { addLembrete } from '../../redux/actions/lembreteActions';
-import { LembreteInput, Prioridade } from '../../redux/types';
+import { Lembrete, LembreteInput, Prioridade } from '../../redux/types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -23,6 +23,7 @@ const CreateLembreteScreen = () => {
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [selectedCatId, setSelectedCatId] = useState<string | null>(null);
   
+  // Prioridade
   const [temPrioridade, setTemPrioridade] = useState(false); 
   const [prioridade, setPrioridade] = useState<number>(1); 
   
@@ -48,6 +49,7 @@ const CreateLembreteScreen = () => {
   const [modalRepeticaoVisible, setModalRepeticaoVisible] = useState(false);
   const [modalAntecedenciaVisible, setModalAntecedenciaVisible] = useState(false); // <--- NOVO
 
+  // Redux
   const dispatch = useDispatch()
   const listas = useSelector((state: RootState) => state.listas.items);
   const categorias = useSelector((state: RootState) => state.categorias.items);

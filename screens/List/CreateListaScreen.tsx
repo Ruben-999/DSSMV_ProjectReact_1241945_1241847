@@ -47,7 +47,6 @@ const CreateListScreen: React.FC = () => {
         user_id: userId,
         nome: nome.trim(),
         descricao: descricao.trim() || null,
-        is_default: false,
       })
     );
 
