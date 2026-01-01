@@ -23,7 +23,6 @@ const CreateLembreteScreen = () => {
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [selectedCatId, setSelectedCatId] = useState<string | null>(null);
   
-  // Prioridade
   const [temPrioridade, setTemPrioridade] = useState(false); 
   const [prioridade, setPrioridade] = useState<number>(1); 
   
@@ -49,7 +48,6 @@ const CreateLembreteScreen = () => {
   const [modalRepeticaoVisible, setModalRepeticaoVisible] = useState(false);
   const [modalAntecedenciaVisible, setModalAntecedenciaVisible] = useState(false); // <--- NOVO
 
-  // Redux
   const dispatch = useDispatch()
   const listas = useSelector((state: RootState) => state.listas.items);
   const categorias = useSelector((state: RootState) => state.categorias.items);

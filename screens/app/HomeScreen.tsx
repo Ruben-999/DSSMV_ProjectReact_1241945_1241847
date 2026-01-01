@@ -58,10 +58,10 @@ const HomeScreen: React.FC = () => {
   }).length;
 
   const stats = [
-    { id: 'hoje', label: 'Hoje', value: countHoje, color: '#fca5a5' }, 
-    { id: 'agendado', label: 'Agendados', value: countAgendados, color: '#fde047' }, 
-    { id: 'concluido', label: 'Concluídos', value: countConcluidos, color: '#86efac' }, 
-    { id: 'todos', label: 'Todos', value: countTodos, color: '#93c5fd' }, 
+    { id: 'hoje', label: 'Hoje', value: countHoje, color: '#FF453A' }, 
+    { id: 'agendado', label: 'Agendados', value: countAgendados, color: '#FF9F0A' }, 
+    { id: 'concluido', label: 'Concluídos', value: countConcluidos, color: '#30D158' }, 
+    { id: 'todos', label: 'Todos', value: countTodos, color: '#0A84FF' }, 
   ];
 
   // Navegação
@@ -99,7 +99,7 @@ const HomeScreen: React.FC = () => {
           {stats.map((s) => (
             <TouchableOpacity 
               key={s.id} 
-              style={styles.gridItem} 
+              style={[styles.gridItem , {backgroundColor: s.color} ]} 
               activeOpacity={0.7}
               onPress={() => handleStatPress(s.id, s.label)}
             >
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   subtitle: { color: '#aaa', marginTop: 4, fontSize: 14 },
   logoutButton: { padding: 8, backgroundColor: '#2a2a2a', borderRadius: 8 },
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 24 },
-  gridItem: { width: '48%', marginBottom: 16 },
+  gridItem: { width: '48%', marginBottom: 16, borderRadius: 16, padding: 12, justifyContent: 'center', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5, },
   section: { marginBottom: 20 },
   sectionTitle: { color: '#fff', fontWeight: '600', fontSize: 18, marginBottom: 8 },
   chipsScroll: { paddingVertical: 4 },

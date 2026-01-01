@@ -9,7 +9,21 @@ interface Props {
   onPress: (item: Lembrete) => void;
 }
 
+
 const LembreteItem: React.FC<Props> = ({ item, onToggleConcluido, onPress }) => {
+
+    const setPrioridadeColor = () => {
+    if (item.prioridade === 3){
+        return '#ff6b6b'
+    }
+    else if (item.prioridade === 2){
+        return '#fde047'
+    }
+    else{
+        return '#30D158'
+    }
+    }
+
   return (
     <TouchableOpacity 
       style={styles.container} 
@@ -54,7 +68,7 @@ const LembreteItem: React.FC<Props> = ({ item, onToggleConcluido, onPress }) => 
              </Text>
            )}
            {item.prioridade > 0 && (
-             <Text style={[styles.metaText, { color: item.prioridade === 3 ? '#ff6b6b' : '#fde047' }]}>
+             <Text style={[styles.metaText, { color: setPrioridadeColor()  }]}>
                {!item.data_hora ? '🚩' : ' • 🚩'} P{item.prioridade}
              </Text>
            )}
