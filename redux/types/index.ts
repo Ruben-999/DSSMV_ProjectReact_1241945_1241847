@@ -37,23 +37,23 @@ export type Prioridade = 0 | 1 | 2 | 3; // 0: Nenhuma, 1: Baixa, 2: Média, 3: A
 export interface Lembrete {
   id: string; // BIGSERIAL no SQL, mas vem como string no JSON geralmente
   user_id: string;
-  lista_id?: number | null; // BIGINT
-  categoria_id?: number | null; // BIGINT
+  lista_id: number | null; // BIGINT
+  categoria_id: number | null; // BIGINT
   titulo: string;
-  descricao?: string | null; // ? --> opcional
+  descricao?: string; // ? --> opcional
   prioridade: Prioridade;
-  data_hora?: string | null; // TIMESTAMP (ISO String)
+  data_hora?: string; // TIMESTAMP (ISO String)
   notificar: boolean;
   antecedencia_minutos: number;
-  repeticao?: string | null;
-  local_latitude?: number | null;
-  local_longitude?: number | null;
-  raio_metros?: number | null;
-  foto_url?: string | null;
+  repeticao?: string;
+  local_latitude?: number;
+  local_longitude?: number;
+  raio_metros?: number;
+  foto_url?: string;
   concluido: boolean;
   created_at: string;
 }
-export type LembreteInput = Omit<Lembrete, 'id' | 'created_at' | 'user_id'>;
+
 // --- ESTADO REDUX ---
 
 export interface LembreteState {
@@ -93,8 +93,8 @@ export interface Lista {
   user_id: string;
   nome: string;
   is_default: boolean; // Para saber se é a lista "Default" que não deve ser apagada
-  descricao?: string;
-  cor_hex?: string;
+  descricao?: string | null;
+  cor_hex?: string | null;
   created_at: string;
 }
 
@@ -133,10 +133,10 @@ export const DELETE_LISTA_FAILURE = 'DELETE_LISTA_FAILURE';
 //=========================================================================
 
 export interface Categoria {
-  id: string; // BIGINT
+  id: string; // BIGINT | 'todos'
   user_id: string;
   nome: string;
-  cor_hex?: string; // Opcional 
+  cor_hex?: string;
   created_at: string;
 }
 
@@ -144,11 +144,14 @@ export interface Categoria {
 
 export interface CategoriaState {
   items: Categoria[];
+  categoriaAtivaId: string;
   loading: boolean;
   error: string | null;
 }
 
 // --- ACTION TYPES ---
+
+export const SET_CATEGORIA_ATIVA = 'SET_CATEGORIA_ATIVA';
 
 // Fetch
 export const FETCH_CATEGORIAS_REQUEST = 'FETCH_CATEGORIAS_REQUEST';

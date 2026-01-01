@@ -23,15 +23,33 @@ export const fetchListas = (userId: string) => {
 };
 
 // Add Lista
-export const addLista = (lista: Omit<Lista, 'id' | 'created_at' | 'is_default'>) => {
+export const addLista = (
+  lista: Omit<Lista, 'id' | 'created_at' | 'is_default'>
+) => {
   return async (dispatch: Dispatch) => {
     dispatch({ type: ADD_LISTA_REQUEST });
+
     try {
       const { data, error } = await apiListas.createLista(lista);
-      if (error) throw new Error(error);
-      dispatch({ type: ADD_LISTA_SUCCESS, payload: data });
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      // 👉 VALIDAÇÃO CRÍTICA
+      if (!data || !data.id) {
+        throw new Error('API não devolveu a lista criada.');
+      }
+
+      dispatch({
+        type: ADD_LISTA_SUCCESS,
+        payload: data,
+      });
     } catch (err: any) {
-      dispatch({ type: ADD_LISTA_FAILURE, payload: err.message });
+      dispatch({
+        type: ADD_LISTA_FAILURE,
+        payload: err.message ?? 'Erro ao criar lista',
+      });
     }
   };
 };

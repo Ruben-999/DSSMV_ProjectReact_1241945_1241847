@@ -1,33 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSelector, useDispatch } from 'react-redux';
+
 import { RootState } from '../redux/reducers';
 import { apiAuth } from '../services/api';
 import { LOGIN_SUCCESS, LOGOUT } from '../redux/types';
 
-// --- SCREENS DE AUTH ---
+// --- SCREENS AUTH ---
 import InitialScreen from '../screens/auth/InitialScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 
-// --- SCREENS DA APP ---
+// --- SCREENS APP ---
 import HomeScreen from '../screens/app/HomeScreen';
-import CreateCategoriaScreen from '../screens/app/CreateCategoriaScreen';
-import CreateListaScreen from '../screens/app/CreateListaScreen';
-import ListsOverviewScreen from '../screens/app/ListsOverviewScreen';
-import ListDetailsScreen from '../screens/app/ListDetailsScreen';
-import CreateLembreteScreen from '../screens/lembretes/CreateLembreteScreen'
+import CreateCategoriaScreen from '../screens/Categorias/CreateCategoriaScreen';
+import CreateListaScreen from '../screens/List/CreateListaScreen';
+import ListsOverviewScreen from '../screens/List/ListsOverviewScreen';
+import ListDetailsScreen from '../screens/List/ListDetailsScreen';
+import CreateLembreteScreen from '../screens/lembretes/CreateLembreteScreen';
 import LembretesListScreen from '../screens/lembretes/LembretesListScreen';
+import EditListScreen from '../screens/List/EditListaScreen';
 
 const Stack = createNativeStackNavigator();
 
 export const AppNavigator = () => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth); 
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-  
-  // Estado local para o splash screen / verificação de sessão
+
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   useEffect(() => {
@@ -43,40 +44,42 @@ export const AppNavigator = () => {
         setIsCheckingSession(false);
       }
     };
+
     checkSession();
   }, [dispatch]);
 
-  // Loading inicial enquanto verifica o Supabase
+  // Splash / loading inicial
   if (isCheckingSession) {
     return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#007AFF" />
       </View>
-    ); 
+    );
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          // --- STACK APP (User Logado) ---
-          // Aqui juntamos o Home com todas as outras telas internas
-          <Stack.Group>
+          // --- STACK APP ---
+          <>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="CreateLembrete" component={CreateLembreteScreen} />
             <Stack.Screen name="CreateCategoria" component={CreateCategoriaScreen} />
+            <Stack.Screen name="EditCategoria" component={CreateCategoriaScreen} />
             <Stack.Screen name="CreateLista" component={CreateListaScreen} />
+            <Stack.Screen name="EditList" component={EditListScreen} />
             <Stack.Screen name="ListsOverview" component={ListsOverviewScreen} />
             <Stack.Screen name="ListDetails" component={ListDetailsScreen} />
             <Stack.Screen name="LembretesList" component={LembretesListScreen} />
-          </Stack.Group>
+          </>
         ) : (
-          // --- STACK AUTH (User Não Logado) ---
-          <Stack.Group>
+          // --- STACK AUTH ---
+          <>
             <Stack.Screen name="Initial" component={InitialScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
-          </Stack.Group>
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

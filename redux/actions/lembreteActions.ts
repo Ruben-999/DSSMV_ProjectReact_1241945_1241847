@@ -5,8 +5,7 @@ import {
   ADD_LEMBRETE_REQUEST, ADD_LEMBRETE_SUCCESS, ADD_LEMBRETE_FAILURE,
   UPDATE_LEMBRETE_REQUEST, UPDATE_LEMBRETE_SUCCESS, UPDATE_LEMBRETE_FAILURE,
   DELETE_LEMBRETE_REQUEST, DELETE_LEMBRETE_SUCCESS, DELETE_LEMBRETE_FAILURE,
-  Lembrete,
-  LembreteInput
+  Lembrete
 } from '../types';
 
 //Fetch
@@ -24,7 +23,7 @@ export const fetchLembretes = (userId: string) => {
 };
 
 // 2. Add
-export const addLembrete = (lembrete: LembreteInput) => {
+export const addLembrete = (lembrete: Omit<Lembrete, 'id' | 'created_at'>) => {
   return async (dispatch: Dispatch) => {
     dispatch({ type: ADD_LEMBRETE_REQUEST });
     try {
