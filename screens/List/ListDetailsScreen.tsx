@@ -25,18 +25,17 @@ const ListDetailsScreen: React.FC = () => {
   const { listaId } = route.params as RouteParams;
 
   const lista = useSelector((s: RootState) =>
-    s.listas.items.find((l) => String(l.id) === String(listaId))
+    s.listas.items.find(l => String(l.id) === String(listaId))
   );
 
   const lembretes = useSelector((s: RootState) => s.lembretes.items);
 
-  // ✅ FIX DE TIPAGEM AQUI
   const categoriaAtivaId = useSelector(
     (s: RootState) => (s.categorias as any).categoriaAtivaId
   );
 
   const lembretesFiltrados = useMemo(() => {
-    return lembretes.filter((l) => {
+    return lembretes.filter(l => {
       if (String(l.lista_id) !== String(listaId)) return false;
       if (categoriaAtivaId === ID_TODOS) return true;
       return String(l.categoria_id) === String(categoriaAtivaId);
@@ -45,7 +44,7 @@ const ListDetailsScreen: React.FC = () => {
 
   if (!lista) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: '#121212' }]}>
         <View style={styles.emptyWrap}>
           <Text style={styles.emptyTitle}>Lista não encontrada</Text>
         </View>
@@ -53,8 +52,10 @@ const ListDetailsScreen: React.FC = () => {
     );
   }
 
+  const backgroundColor = lista.cor_hex ?? '#121212';
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.back}>Voltar</Text>
@@ -82,7 +83,7 @@ const ListDetailsScreen: React.FC = () => {
       ) : (
         <FlatList
           data={lembretesFiltrados}
-          keyExtractor={(i) => String(i.id)}
+          keyExtractor={i => String(i.id)}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           renderItem={({ item }) => (
@@ -97,8 +98,10 @@ const ListDetailsScreen: React.FC = () => {
       )}
 
       <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('CreateLembrete', { listaId })}
+        style={[styles.fab, { backgroundColor: '#00000055' }]}
+        onPress={() =>
+          navigation.navigate('AddLembreteToLista', { listaId })
+        }
       >
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
@@ -109,14 +112,20 @@ const ListDetailsScreen: React.FC = () => {
 export default ListDetailsScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#121212' },
+  container: { flex: 1 },
+
   header: {
     padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  back: { color: '#6c2cff', fontWeight: '600' },
+
+  back: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+
   title: {
     color: '#fff',
     fontSize: 22,
@@ -124,29 +133,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 6,
   },
+
   subtitle: {
-    color: '#aaa',
+    color: '#e5e7eb',
     paddingHorizontal: 16,
     marginTop: 6,
     marginBottom: 8,
   },
-  listContent: { padding: 16, paddingBottom: 120 },
+
+  listContent: {
+    padding: 16,
+    paddingBottom: 120,
+  },
+
   row: {
     backgroundColor: '#1e1e1e',
     padding: 14,
     borderRadius: 10,
   },
-  rowTitle: { color: '#fff', fontWeight: '700' },
-  rowDesc: { color: '#aaa', marginTop: 4 },
+
+  rowTitle: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+
+  rowDesc: {
+    color: '#aaa',
+    marginTop: 4,
+  },
+
   separator: { height: 10 },
-  emptyWrap: { padding: 24, alignItems: 'center' },
+
+  emptyWrap: {
+    padding: 24,
+    alignItems: 'center',
+  },
+
   emptyTitle: {
     color: '#fff',
     fontWeight: '700',
     fontSize: 16,
     marginBottom: 8,
   },
-  emptyText: { color: '#999', textAlign: 'center' },
+
+  emptyText: {
+    color: '#e5e7eb',
+    textAlign: 'center',
+  },
+
   fab: {
     position: 'absolute',
     bottom: 20,
@@ -154,7 +188,6 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#6c2cff',
     alignItems: 'center',
     justifyContent: 'center',
   },
