@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
 
   error: {
-    color: '#121212',
+    color: '#fff',
     padding: 16,
     fontSize: 16,
   },
