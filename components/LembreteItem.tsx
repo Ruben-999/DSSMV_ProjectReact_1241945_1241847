@@ -1,7 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Lembrete } from '../redux/types';
+
+// Dados do SupaBase Storage
+const SUPABASE_PROJECT_ID = 'qrcsmtgswmlpcyivsquu'; 
+const BUCKET_NAME = 'lembretes-fotos';
 
 interface Props {
   item: Lembrete;
@@ -9,28 +13,33 @@ interface Props {
   onPress: (item: Lembrete) => void;
 }
 
-
 const LembreteItem: React.FC<Props> = ({ item, onToggleConcluido, onPress }) => {
 
-    const setPrioridadeColor = () => {
-    if (item.prioridade === 3){
-        return '#ff6b6b'
-    }
-    else if (item.prioridade === 2){
-        return '#fde047'
-    }
-    else{
-        return '#30D158'
-    }
-    }
+  const setPrioridadeColor = () => {
+    if (item.prioridade === 3) return '#ff6b6b';
+    if (item.prioridade === 2) return '#fde047';
+    return '#30D158'; 
+  };
+
+  // Função auxiliar para construir o URL da imagem
+  const getImageUrl = (path: string | null | undefined) => {
+    if (!path) return null;
+    // Se por acaso já guardamos o URL completo (começa por http), usa-o direto
+    if (path.startsWith('http')) return path;
+    
+    // Constrói o URL público do Supabase
+    return `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${BUCKET_NAME}/${path}`;
+  };
+
+  const imageUrl = getImageUrl(item.foto_url);
 
   return (
     <TouchableOpacity 
       style={styles.container} 
-      onPress={() => onPress(item)} // Clicar no corpo para abrir detalhes/editar
+      onPress={() => onPress(item)}
       activeOpacity={0.7}
     >
-      {/* Botão Checkbox (Concluir) */}
+      {/* Coluna Esquerda: Checkbox */}
       <TouchableOpacity 
         style={styles.checkContainer} 
         onPress={() => onToggleConcluido(item.id, !item.concluido)}
@@ -42,8 +51,10 @@ const LembreteItem: React.FC<Props> = ({ item, onToggleConcluido, onPress }) => 
         />
       </TouchableOpacity>
 
-      {/* Conteúdo de Texto */}
-      <View style={styles.textContainer}>
+      {/* Coluna Central: Texto e Imagem */}
+      <View style={styles.contentContainer}>
+        
+        {/* Título */}
         <Text 
           style={[styles.title, item.concluido && styles.completedText]} 
           numberOfLines={1}
@@ -51,6 +62,7 @@ const LembreteItem: React.FC<Props> = ({ item, onToggleConcluido, onPress }) => 
           {item.titulo}
         </Text>
         
+        {/* Descrição */}
         {item.descricao ? (
           <Text 
             style={[styles.description, item.concluido && styles.completedText]} 
@@ -60,7 +72,17 @@ const LembreteItem: React.FC<Props> = ({ item, onToggleConcluido, onPress }) => 
           </Text>
         ) : null}
 
-        {/* Pequena info extra (Data ou Prioridade) */}
+        {/* ---FOTO ANEXADA --- */}
+        {imageUrl && (
+          <View style={styles.imageWrapper}>
+            <Image 
+              source={{ uri: imageUrl }} 
+              style={[styles.attachedImage, item.concluido && { opacity: 0.5 }]} 
+            />
+          </View>
+        )}
+
+        {/* Metadados (Data e Prioridade) */}
         <View style={styles.metaContainer}>
            {item.data_hora && (
              <Text style={styles.metaText}>
@@ -68,15 +90,15 @@ const LembreteItem: React.FC<Props> = ({ item, onToggleConcluido, onPress }) => 
              </Text>
            )}
            {item.prioridade > 0 && (
-             <Text style={[styles.metaText, { color: setPrioridadeColor()  }]}>
+             <Text style={[styles.metaText, { color: setPrioridadeColor() }]}>
                {!item.data_hora ? '🚩' : ' • 🚩'} P{item.prioridade}
              </Text>
            )}
         </View>
       </View>
 
-      {/* Seta indicando que é clicável */}
-      <Ionicons name="chevron-forward" size={20} color="#444" />
+      {/* Coluna Direita: Seta */}
+      <Ionicons name="chevron-forward" size={20} color="#444" style={styles.chevron} />
       
     </TouchableOpacity>
   );
@@ -87,19 +109,20 @@ export default LembreteItem;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start', // Alinhado ao topo para suportar conteúdo variável
     backgroundColor: '#1e1e1e',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16, // Mais arredondado
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#333',
   },
   checkContainer: {
     marginRight: 16,
+    marginTop: 2, // Pequeno ajuste para alinhar com o título
   },
-  textContainer: {
-    flex: 1,
+  contentContainer: {
+    flex: 1, // Ocupa o espaço central todo
   },
   title: {
     color: '#fff',
@@ -110,12 +133,26 @@ const styles = StyleSheet.create({
   description: {
     color: '#aaa',
     fontSize: 14,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   completedText: {
     textDecorationLine: 'line-through',
     color: '#5b5b5bff',
   },
+  // --- Estilos da Imagem ---
+  imageWrapper: {
+    marginTop: 4,
+    marginBottom: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#2a2a2a', // Fundo enquanto carrega
+  },
+  attachedImage: {
+    width: '100%',
+    height: 150, // Altura fixa para manter consistência
+    resizeMode: 'cover',
+  },
+  // -------------------------
   metaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -124,5 +161,9 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 12,
     marginRight: 8,
+  },
+  chevron: {
+    marginTop: 4, // Alinhar com o título visualmente
+    marginLeft: 8,
   }
 });

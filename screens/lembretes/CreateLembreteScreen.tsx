@@ -151,7 +151,7 @@ const CreateLembreteScreen = () => {
   };
 
   // --- SUBMETER ---
-// --- SUBMETER (ADAPTADO À TUA BD) ---
+
   const handleCreate = async () => {
     // 1. Tratamento da Localização (Converter String "lat, long" para numeros)
     let lat = null;
@@ -197,7 +197,7 @@ const CreateLembreteScreen = () => {
         concluido: false
     };
 
-    console.log("🚀 Payload Adaptado para BD:", novoLembrete);
+    console.log("Payload:", novoLembrete);
     
     // Dispatch da Action
     // O cast 'as any' ajuda se o TypeScript reclamar da falta de ID (que é gerado na BD)

@@ -1,26 +1,31 @@
 import { supabase } from './supabaseClient';
 import { ILembreteService, ServiceResponse } from '../interfaces';
 import { Lembrete, LembreteInput } from '../../redux/types';
+import * as FileSystem from 'expo-file-system/legacy';
+import { decode } from 'base64-arraybuffer';
 
-// Função auxiliar para upload de imagem
 const uploadImage = async (localUri: string, userId: string): Promise<string | null> => {
   try {
-    // 1. Converter URI local para Blob
-    const response = await fetch(localUri);
-    const blob = await response.blob();
+    // Ler o ficheiro como String Base64
+    const base64 = await FileSystem.readAsStringAsync(localUri, { // transforma imagem em string  
+      encoding: 'base64',                                         // para facilitar transporte 
+    });
 
-    // 2. Gerar nome único (ex: user_id/timestamp.jpg)
-    const fileExt = localUri.split('.').pop();
+    // Gerar nome único
+    const fileExt = localUri.split('.').pop() || 'jpg';
     const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
-    // 3. Upload para o bucket 'lembretes-fotos'
+    // Upload usando ArrayBuffer
     const { data, error } = await supabase.storage
       .from('lembretes-fotos')
-      .upload(fileName, blob);
+      .upload(fileName, decode(base64), { //decode para reconverter a strig em imagem antes de dar upload
+        contentType: 'image/jpeg',
+        upsert: true
+      });
 
     if (error) throw error;
 
-    // Retorna o caminho (path) para guardar na BD
+    // Retorna o caminho (path) para guardar na BD (Supabase)
     return data.path; 
   } catch (error) {
     console.error("Erro no upload da imagem:", error);

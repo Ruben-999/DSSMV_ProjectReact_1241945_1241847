@@ -67,7 +67,7 @@ const HomeScreen: React.FC = () => {
 
   const hojeString = new Date().toISOString().split('T')[0]; // Data YYYY-MM-DD
 
-  // Estatísticas (Cores Vibrantes)
+  // Estatísticas 
   const countConcluidos = lembretes.filter(l => l.concluido).length;
   const countTodos = lembretes.filter(l => !l.concluido).length;
 
