@@ -1,5 +1,6 @@
 import { Dispatch } from 'redux';
 import { apiLembretes } from '../../services/api';
+import { NotificationService } from '../../services/notification/NotificationService';
 import { 
   FETCH_LEMBRETES_REQUEST, FETCH_LEMBRETES_SUCCESS, FETCH_LEMBRETES_FAILURE,
   ADD_LEMBRETE_REQUEST, ADD_LEMBRETE_SUCCESS, ADD_LEMBRETE_FAILURE,
@@ -30,6 +31,9 @@ export const addLembrete = (lembrete: LembreteInput) => {
     try {
       const { data, error } = await apiLembretes.createLembrete(lembrete);
       if (error) throw new Error(error);
+      if(data){
+        await NotificationService.scheduleLembreteNotification(data) //agenda-se a notificação e depois dispatch
+      }
       dispatch({ type: ADD_LEMBRETE_SUCCESS, payload: data });
     } catch (err: any) {
       dispatch({ type: ADD_LEMBRETE_FAILURE, payload: err.message });

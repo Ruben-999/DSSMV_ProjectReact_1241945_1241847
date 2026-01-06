@@ -3,6 +3,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSelector, useDispatch } from 'react-redux';
+import { NotificationService } from '../services/notification/NotificationService';
 
 import { RootState } from '../redux/reducers';
 import { apiAuth } from '../services/api';
@@ -90,6 +91,11 @@ export const AppNavigator = () => {
 
     checkSession();
   }, [dispatch]);
+
+  useEffect(() => {
+    // Pedir permissão ao iniciar a App
+    NotificationService.registerForPushNotificationsAsync();
+  }, []);
 
   if (isCheckingSession) {
     return (
