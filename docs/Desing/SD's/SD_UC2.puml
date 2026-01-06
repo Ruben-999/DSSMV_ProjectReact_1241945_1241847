@@ -1,0 +1,35 @@
+@startuml
+' SD – UC2 Login User
+' Aligned with final SSD and PingMe2 React architecture (no Service layer)
+
+autonumber
+
+actor "User" as user
+participant "LoginScreen" as UI
+participant "AuthActions" as Actions
+participant "AuthReducer" as Reducer
+participant "API (fetch)" as API
+
+user -> UI: Enters email and password
+user -> UI: Presses "Login"
+
+UI -> Actions: loginUserStarted()
+Actions -> Reducer: set loading = true
+Reducer --> UI: updated state
+
+UI -> Actions: loginUser(credentials)
+Actions -> API: fetch(POST /login, credentials)
+
+alt Credentials are valid
+  API --> Actions: success(response)
+  Actions -> Reducer: loginUserSuccess(user)
+  Reducer --> UI: updated state
+  UI --> user: Navigates to Home\n(User authenticated)
+else Credentials are invalid
+  API --> Actions: failure(error)
+  Actions -> Reducer: loginUserFailure(error)
+  Reducer --> UI: updated state
+  UI --> user: Shows error message\n(Invalid credentials)
+end
+
+@enduml

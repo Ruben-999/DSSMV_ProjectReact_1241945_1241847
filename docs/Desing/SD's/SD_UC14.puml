@@ -1,0 +1,33 @@
+@startuml
+' SD – UC14 Delete Reminder
+' Deletion triggered from ReminderDetailsScreen
+
+autonumber
+
+actor "User" as user
+participant "LembreteListScreen" as DetailsUI
+participant "lembreteAction" as Actions
+participant "lembreteReducer" as Reducer
+participant "API (fetch)" as API
+
+user -> DetailsUI: Selects "Delete Reminder Button"
+DetailsUI --> user: Requests deletion confirmation
+user -> DetailsUI: Confirms deletion
+
+DetailsUI -> Actions: deleteReminderStarted()
+Actions -> Reducer: set loading = true
+Reducer --> DetailsUI: updated state
+
+DetailsUI -> Actions: deleteReminder(reminderId)
+Actions -> API: fetch(DELETE /reminders/{id})
+
+alt Deletion confirmed
+  API --> Actions: success()
+  Actions -> Reducer: deleteReminderSuccess(reminderId)
+  Reducer --> DetailsUI: updated state
+  DetailsUI --> user: Shows success message\n(Reminder deleted)
+else Deletion cancelled
+  DetailsUI --> user: Operation cancelled
+end
+
+@enduml

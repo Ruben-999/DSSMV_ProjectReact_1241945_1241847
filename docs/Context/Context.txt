@@ -1,0 +1,5 @@
+This project involves the development of an Android application called PingMe2, designed to assist users in managing their daily tasks in an organized and efficient way. The application focuses on providing a digital reminder and task management system that allows users to register, organize, and track their activities.
+
+PingMe2 interacts with a RESTful API to perform all core operations related to data management. Through this interaction, the application supports the full set of CRUD operations, enabling users to create, view, update, and delete reminders, categories, and lists. This architecture ensures a clear separation between the client application and the backend services.
+
+The main objective of PingMe2 is to help users structure their daily routine by offering intuitive task organization mechanisms, such as categorization, list grouping, completion tracking, and filtering. By combining a mobile user interface with a REST API, the application demonstrates a modern client–server approach commonly used in contemporary mobile software development.

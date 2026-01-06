@@ -1,0 +1,18 @@
+@startuml
+' SSD – UC17 View Completed Reminders
+
+autonumber
+
+actor "User" as user
+participant System as sys
+
+user -> sys: Selects "Concluidos" reminder container
+sys -> sys: Retrieve completed reminders
+
+alt Reminders exist
+  sys --> user: Displays completed reminders
+else No reminders found
+  sys --> user: Displays empty list
+end
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+' SSD – UC13 Edit Reminder
+
+autonumber
+
+actor "User" as user
+participant System as sys
+
+
+user -> sys: Selects reminder
+user -> sys: Edits reminder data
+sys -> sys: Validate data
+
+alt Data is valid
+  sys --> user: Informs operation success\n(Reminder updated)
+else Data is invalid
+  sys --> user: Informs operation failure\n(Invalid data)
+end
+
+@enduml

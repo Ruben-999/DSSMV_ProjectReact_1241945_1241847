@@ -1,0 +1,58 @@
+@startuml
+' SD – UC10 Delete List
+' Aligned with final SSD
+' Two deletion entry points, same Redux flow
+
+autonumber
+
+actor "User" as user
+participant "ListsOverviewScreen" as HomeUI
+participant "EditListScreen" as EditUI
+participant "ListActions" as Actions
+participant "ListReducer" as Reducer
+participant "API (fetch)" as API
+
+alt Delete via long press on list
+  user -> HomeUI: Long press on list
+  HomeUI -> HomeUI: Activates delete mode
+  HomeUI --> user: Requests deletion confirmation
+  user -> HomeUI: Confirms deletion
+
+  HomeUI -> Actions: deleteListStarted()
+  Actions -> Reducer: set loading = true
+  Reducer --> HomeUI: updated state
+
+  HomeUI -> Actions: deleteList(listId)
+  Actions -> API: fetch(DELETE /lists/{id})
+
+  alt Deletion confirmed
+    API --> Actions: success()
+    Actions -> Reducer: deleteListSuccess(listId)
+    Reducer --> HomeUI: updated state
+    HomeUI --> user: Shows success message\n(List deleted)
+  else Deletion cancelled
+    HomeUI --> user: Operation cancelled
+  end
+
+else Delete via list edit screen
+  user -> HomeUI: Opens list
+  HomeUI -> EditUI: Navigates to EditListScreen
+
+  user -> EditUI: Selects "Delete Button"
+  EditUI --> user: Requests deletion confirmation
+  user -> EditUI: Confirms deletion
+
+  EditUI -> Actions: deleteListStarted()
+  Actions -> Reducer: set loading = true
+  Reducer --> EditUI: updated state
+
+  EditUI -> Actions: deleteList(listId)
+  Actions -> API: fetch(DELETE /lists/{id})
+
+  alt Deletion confirmed
+    API --> Actions: success()
+    Actions -> Reducer: deleteListSuccess(listId)
+    Reducer --> EditUI: updated state
+    EditUI --> user: Shows success message\n(List deleted)
+  else Deletion cancelled
+    EditUI --> user: Ope

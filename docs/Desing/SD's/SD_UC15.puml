@@ -1,0 +1,36 @@
+@startuml
+' SD – UC15 Mark Reminder as Completed
+' Using LembreteListScreen as adaptive reminder container
+
+autonumber
+
+actor "User" as user
+participant "LembreteListScreen" as ListUI
+participant "ReminderActions" as Actions
+participant "ReminderReducer" as Reducer
+participant "API (fetch)" as API
+
+user -> ListUI: Selects reminder
+user -> ListUI: Marks reminder as completed
+
+ListUI -> Actions: markReminderCompletedStarted()
+Actions -> Reducer: set loading = true
+Reducer --> ListUI: updated state
+
+ListUI -> Actions: markReminderCompleted(reminderId)
+Actions -> API: fetch(PATCH /reminders/{id}, completed=true)
+
+API --> Actions: success(response)
+Actions -> Reducer: markReminderCompletedSuccess(reminderId)
+
+note right of Reducer
+LembreteListScreen adapts automatically
+to the updated global state and
+re-renders according to its context
+(Todos / Concluidos/ Agendados/ Hoje).
+end note
+
+Reducer --> ListUI: updated reminders state
+ListUI --> user: Reminder removed from "Todos"\nand appears in "Concluidos"
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+' SSD – UC14 Delete Reminder
+
+autonumber
+
+actor "User" as user
+participant System as sys
+
+
+user -> sys: Selects reminder
+sys --> user: Requests deletion confirmation
+user -> sys: Confirms deletion
+
+alt Deletion confirmed
+  sys --> user: Informs operation success\n(Reminder deleted)
+else Deletion cancelled
+  sys --> user: Operation cancelled
+end
+
+@enduml

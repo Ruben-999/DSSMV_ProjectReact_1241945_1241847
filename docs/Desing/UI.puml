@@ -1,0 +1,60 @@
+@startuml
+' 5. User Interface – Navigation Diagram (PingMe2)
+
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam roundcorner 20
+
+rectangle "PingMe2 App-UI Navigation" {
+
+  rectangle "Auth"{
+    rectangle "InitialScreen" as Initial
+    rectangle "LoginScreen" as Login
+    rectangle "RegisterScreen" as Register
+    }
+  rectangle "HomeScreen" as Home
+
+  rectangle "Categories" {
+    rectangle "CreateCategoriaScreen" as CreateCat
+    rectangle "EditCategoriaScreen" as EditCat
+  }
+
+  rectangle "Reminders" {
+    rectangle "LembretesListScreen" as LembretesList
+    rectangle "LembreteScreen" as Lembrete
+    rectangle "CreateLembreteScreen" as CreateLembrete
+    rectangle "EditLembreteScreen" as EditLembrete
+  }
+
+  rectangle "Lists" {
+    rectangle "ListsOverviewScreen" as ListsOverview
+    rectangle "ListDetailsScreen" as ListDetails
+    rectangle "CreateListaScreen" as CreateLista
+    rectangle "EditListaScreen" as EditLista
+    rectangle "AddLembreteToListaScreen" as AddLembrete
+  }
+
+}
+
+' ---- Flow ----
+' Authentication Management Flow
+Initial --> Login : 1.1-If user wants to log in
+Initial --> Register : 1.2.If new user wants to sign up
+Login --> Home : 2.1-On successful login
+Register --> Home : 2.2-On successful registration
+Home --> Login : 3-Logout
+'Category Management Flow
+Home --> CreateCat : 4.1-Create new category
+Home --> EditCat : 4.2Edit existing category
+'Reminder Management Flow
+Home --> CreateLembrete : 5.1-Create new reminder
+LembretesList --> Lembrete : 5.1.1-View reminder details
+LembretesList --> EditLembrete : 5.1.2-Edit existing reminder
+Home --> LembretesList : 5.2-View a specific reminder list
+'List Management Flow
+Home --> ListsOverview : 6-See all lists
+ListsOverview --> ListDetails : 6.1-View list details
+ListsOverview --> CreateLista : 6.2-Create new list
+ListDetails --> EditLista : 6.1.1-Edit existing list
+ListDetails --> AddLembrete : 6.1.2-Add reminder to list
+@enduml

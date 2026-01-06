@@ -1,0 +1,18 @@
+@startuml
+' SSD – UC12 Create Reminder
+
+actor "User" as user
+participant System as sys
+
+user -> sys: Selects "Create Reminder Button"
+sys --> user: Requests reminder data
+user -> sys: Provides typed data
+
+sys -> sys: Validate data
+alt Data is valid
+  sys --> user: Informs operation success\n(Reminder created)
+else Data is invalid
+  sys --> user: Informs operation failure\n(Invalid data)
+end
+
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+' SD – UC7 Select Active Category
+' Aligned with final SSD and PingMe2 React architecture
+
+autonumber
+
+actor "User" as user
+participant "HomeScreen" as UI
+participant "CategoryActions" as CatActions
+participant "ReminderActions" as RemActions
+participant "CategoryReducer" as CatReducer
+participant "ReminderReducer" as RemReducer
+
+user -> UI: Selects category
+
+UI -> CatActions: setActiveCategory(categoryId)
+CatActions -> CatReducer: update activeCategoryId
+CatReducer --> UI: updated state
+
+UI -> RemActions: filterRemindersByCategory(categoryId)
+RemActions -> RemReducer: apply category filter
+RemReducer --> UI: updated reminders state
+
+UI --> user: Displays only filtered reminders
+
+@enduml

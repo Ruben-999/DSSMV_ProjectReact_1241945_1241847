@@ -1,0 +1,14 @@
+@startuml
+' SSD – UC7 Select Active Category
+
+autonumber
+actor "User" as user
+participant System as sys
+
+
+user -> sys: Selects category
+sys -> sys: Set category as active
+sys -> sys: Filter reminders in all views by active category
+sys --> user: Displays only filtered reminders
+
+@enduml

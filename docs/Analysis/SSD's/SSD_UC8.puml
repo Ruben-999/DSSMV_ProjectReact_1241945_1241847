@@ -1,0 +1,21 @@
+@startuml
+' SSD – UC8 Create List
+
+autonumber
+
+actor "User" as user
+participant System as sys
+
+
+user -> sys: Selects "Create List"
+sys --> user: Requests list data\n(Name, Description, Color, Lembretes)
+user -> sys: Provides typed data
+
+sys -> sys: Validate data
+alt Data is valid
+  sys --> user: Informs operation success\n(List created)
+else Data is invalid
+  sys --> user: Informs operation failure\n(Invalid data)
+end
+
+@enduml

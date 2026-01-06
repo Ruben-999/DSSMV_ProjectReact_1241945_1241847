@@ -1,0 +1,35 @@
+@startuml
+' SSD – UC10 Delete List
+' Two alternative ways to trigger deletion
+
+autonumber
+
+actor "User" as user
+participant System as sys
+
+alt Delete via long press on list
+  user -> sys: Long press on list
+  sys --> user: Activates delete mode
+  sys --> user: Requests deletion confirmation
+  user -> sys: Confirms deletion
+
+  alt Deletion confirmed
+    sys --> user: Informs operation success\n(List deleted)
+  else Deletion cancelled
+    sys --> user: Operation cancelled
+  end
+
+else Delete via list edit screen
+  user -> sys: Opens list edit screen
+  user -> sys: Selects "Delete BUTTON"
+  sys --> user: Requests deletion confirmation
+  user -> sys: Confirms deletion
+
+  alt Deletion confirmed
+    sys --> user: Informs operation success\n(List deleted)
+  else Deletion cancelled
+    sys --> user: Operation cancelled
+  end
+end
+
+@enduml

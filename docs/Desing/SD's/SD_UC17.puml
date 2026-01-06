@@ -1,0 +1,36 @@
+@startuml
+' SD – UC17 View Completed Reminders
+' Navigation from HomeScreen to LembreteListScreen (Concluidos)
+
+autonumber
+
+actor "User" as user
+participant "HomeScreen" as HomeUI
+participant "LembreteListScreen" as ListUI
+participant "ReminderActions" as Actions
+participant "ReminderReducer" as Reducer
+participant "API (fetch)" as API
+
+user -> HomeUI: Selects "Concluidos" reminder container
+HomeUI -> ListUI: Navigates to LembreteListScreen\n(mode = Concluidos)
+
+ListUI -> Actions: fetchCompletedRemindersStarted()
+Actions -> Reducer: set loading = true
+Reducer --> ListUI: updated state
+
+ListUI -> Actions: fetchCompletedReminders()
+Actions -> API: fetch(GET /reminders?completed=true)
+
+alt Reminders exist
+  API --> Actions: success(reminders)
+  Actions -> Reducer: fetchCompletedRemindersSuccess(reminders)
+  Reducer --> ListUI: updated reminders state
+  ListUI --> user: Displays completed reminders
+else No reminders found
+  API --> Actions: success(empty list)
+  Actions -> Reducer: fetchCompletedRemindersSuccess(empty)
+  Reducer --> ListUI: updated state
+  ListUI --> user: Displays empty list
+end
+
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+' SSD – UC2 Login User
+
+autonumber
+
+actor "User" as user
+participant System as sys
+
+
+user -> sys: Selects "Login"
+sys --> user: Requests typed data\n(Email, Password)
+user -> sys: Provides typed data
+
+sys -> sys: Validate credentials
+alt Credentials are valid
+  sys --> user: Informs operation success\n(User authenticated)
+else Credentials are invalid
+  sys --> user: Informs operation failure\n(Invalid credentials)
+end
+
+@enduml

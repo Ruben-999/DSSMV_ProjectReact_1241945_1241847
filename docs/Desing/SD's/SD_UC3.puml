@@ -1,0 +1,20 @@
+@startuml
+' SD – UC3 Logout User
+' Aligned with final SSD and PingMe2 React architecture (no Service layer)
+
+autonumber
+
+actor "User" as user
+participant "HomeScreen" as UI
+participant "AuthActions" as Actions
+participant "AuthReducer" as Reducer
+
+user -> UI: Selects "Logout Button"
+
+UI -> Actions: logoutUser()
+Actions -> Reducer: clear auth state
+Reducer --> UI: updated state
+
+UI --> user: Redirects to Login\n(Session ended)
+
+@enduml
