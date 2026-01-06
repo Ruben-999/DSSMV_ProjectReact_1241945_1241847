@@ -1,0 +1,39 @@
+@startuml
+' SD – UC13 Edit Reminder
+' Aligned with final SSD and PingMe2 React architecture (Redux, no Service layer)
+
+autonumber
+
+actor "User" as user
+participant "LembreteScreen" as HomeUI
+participant "EditLembreteScreen" as EditUI
+participant "lembreteActions" as Actions
+participant "lembreteReducer" as Reducer
+participant "API (fetch)" as API
+
+user -> HomeUI: Selects "Edit Reminder Button"
+HomeUI -> EditUI: Navigates to EditReminderScreen\n(reminderId)
+
+user -> EditUI: Edits reminder data
+user -> EditUI: Confirms changes
+
+EditUI -> Actions: updateReminderStarted()
+Actions -> Reducer: set loading = true
+Reducer --> EditUI: updated state
+
+EditUI -> Actions: updateReminder(reminderData)
+Actions -> API: fetch(PUT /reminders/{id}, reminderData)
+
+alt Data is valid
+  API --> Actions: success(response)
+  Actions -> Reducer: updateReminderSuccess(reminder)
+  Reducer --> EditUI: updated state
+  EditUI --> user: Shows success message\n(Reminder updated)
+else Data is invalid
+  API --> Actions: failure(error)
+  Actions -> Reducer: updateReminderFailure(error)
+  Reducer --> EditUI: updated state
+  EditUI --> user: Shows error message\n(Invalid data)
+end
+
+@enduml

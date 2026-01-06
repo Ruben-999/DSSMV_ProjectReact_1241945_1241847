@@ -1,0 +1,35 @@
+@startuml
+' SD – UC1 Register User
+' Aligned with final SSD and PingMe2 React architecture (no Service layer)
+
+autonumber
+
+actor "User" as user
+participant "RegisterScreen" as UI
+participant "AuthActions" as Actions
+participant "AuthReducer" as Reducer
+participant "API (fetch)" as API
+
+user -> UI: Fills registration form\n(Name, Email, Password)
+user -> UI: Presses "Register"
+
+UI -> Actions: registerUserStarted()
+Actions -> Reducer: set loading = true
+Reducer --> UI: updated state
+
+UI -> Actions: registerUser(data)
+Actions -> API: fetch(POST /register, data)
+
+alt Data is valid
+  API --> Actions: success(response)
+  Actions -> Reducer: registerUserSuccess(user)
+  Reducer --> UI: updated state
+  UI --> user: Shows success message\n(Account created)
+else Data is invalid
+  API --> Actions: failure(error)
+  Actions -> Reducer: registerUserFailure(error)
+  Reducer --> UI: updated state
+  UI --> user: Shows error message\n(Invalid data)
+end
+
+@enduml

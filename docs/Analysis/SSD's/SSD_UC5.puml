@@ -1,0 +1,23 @@
+@startuml
+' SSD – UC5 Edit Category
+
+autonumber
+
+actor "User" as user
+participant System as sys
+
+
+user -> sys: Selects edit category Button
+sys --> user: Enters edit category mode
+user -> sys: Selects category to edit
+sys --> user: Displays current category data
+user -> sys: Edits category data
+sys -> sys: Validate data
+
+alt Data is valid
+  sys --> user: Informs operation success\n(Category updated)
+else Data is invalid
+  sys --> user: Informs operation failure\n(Invalid data)
+end
+
+@enduml

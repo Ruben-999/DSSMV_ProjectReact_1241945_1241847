@@ -1,0 +1,40 @@
+@startuml
+' SD – UC8 Create List
+' Aligned with final SSD and PingMe2 React architecture (Redux, no Service layer)
+
+autonumber
+
+actor "User" as user
+participant "ListsOverviewScreen" as HomeUI
+participant "CreateListScreen" as CreateUI
+participant "ListActions" as Actions
+participant "ListReducer" as Reducer
+participant "API (fetch)" as API
+
+user -> HomeUI: Selects "Create List button"
+HomeUI -> CreateUI: Navigates to CreateListScreen
+
+CreateUI -> user: Requests list data\n(Name, Description, Color, Lembretes)
+user -> CreateUI: Provides typed and selected data
+user -> CreateUI: Confirms creation
+
+CreateUI -> Actions: createListStarted()
+Actions -> Reducer: set loading = true
+Reducer --> CreateUI: updated state
+
+CreateUI -> Actions: createList(listData)
+Actions -> API: fetch(POST /lists, listData)
+
+alt Data is valid
+  API --> Actions: success(response)
+  Actions -> Reducer: createListSuccess(list)
+  Reducer --> CreateUI: updated state
+  CreateUI --> user: Shows success message\n(List created)
+else Data is invalid
+  API --> Actions: failure(error)
+  Actions -> Reducer: createListFailure(error)
+  Reducer --> CreateUI: updated state
+  CreateUI --> user: Shows error message\n(Invalid data)
+end
+
+@enduml

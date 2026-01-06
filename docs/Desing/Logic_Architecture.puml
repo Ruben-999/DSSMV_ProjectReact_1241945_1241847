@@ -1,0 +1,48 @@
+@startuml
+' 3.2 Arquitetura Lógica – PingMe2
+' Component Diagram (no arrows, UML-style connectors)
+
+skinparam componentStyle uml2
+skinparam shadowing false
+
+package "PingMe2 Mobile App" {
+
+  component "UI" as UI
+  component "Components" as CMP
+  component "Redux Provider" as Provider
+  component "Redux Store" as Store
+  component "Reducers" as Reducer
+  component "Actions" as Actions
+  component "Network (fetch)" as Fetch
+  component "Assets" as Assets
+
+  interface "Dispatch"
+  interface "State"
+  interface "HTTP"
+
+  ' UI ↔ Redux via interfaces
+  UI - Dispatch
+  Actions - Dispatch
+
+  UI - State
+  Store - State
+
+  ' Redux internal wiring (structural, no direction)
+  Provider -- Store
+  Store -- Reducer
+  Store -- Actions
+
+  ' Network communication
+  Actions - HTTP
+  Fetch - HTTP
+}
+
+component "Backend API" as API
+
+Fetch -- API
+
+' UI composition
+CMP -- UI
+Assets -- CMP
+
+@enduml

@@ -67,19 +67,34 @@ const HomeScreen: React.FC = () => {
 
   const hojeString = new Date().toISOString().split('T')[0]; // Data YYYY-MM-DD
 
-  // Estatísticas 
-  const countConcluidos = lembretes.filter(l => l.concluido).length;
-  const countTodos = lembretes.filter(l => !l.concluido).length;
+  // --- FILTRO GLOBAL POR CATEGORIA ATIVA ---
+  const lembretesFiltrados = useMemo(() => {
+  // Categoria "Todos" → não filtra
+  if (!categoriaAtivaId || String(categoriaAtivaId) === ID_TODOS) {
+    return lembretes;
+  }
 
-  const countHoje = lembretes.filter(l => {
-    if (l.concluido || !l.data_hora) return false;
-    return l.data_hora.split('T')[0] === hojeString;
+  // Filtra pela categoria do lembrete
+  return lembretes.filter(
+    (l: any) => String(l.categoria_id) === String(categoriaAtivaId)
+  );
+  }, [lembretes, categoriaAtivaId]);
+
+  
+  // Estatísticas (filtradas pela categoria ativa)
+  const countConcluidos = lembretesFiltrados.filter(l => l.concluido).length;
+  const countTodos = lembretesFiltrados.filter(l => !l.concluido).length;
+
+  const countHoje = lembretesFiltrados.filter(l => {
+  if (l.concluido || !l.data_hora) return false;
+  return l.data_hora.split('T')[0] === hojeString;
   }).length;
 
-  const countAgendados = lembretes.filter(l => {
-    if (l.concluido || !l.data_hora) return false;
-    return l.data_hora.split('T')[0] !== hojeString;
+  const countAgendados = lembretesFiltrados.filter(l => {
+  if (l.concluido || !l.data_hora) return false;
+  return l.data_hora.split('T')[0] !== hojeString;
   }).length;
+
 
   const stats = [
     { id: 'hoje', label: 'Hoje', value: countHoje, color: '#FF453A' },       // Vermelho
@@ -117,7 +132,7 @@ const HomeScreen: React.FC = () => {
         Alert.alert('Protegido', '"Todos" não pode ser editado.');
         return;
       }
-      navigation.navigate('CreateCategoria', { categoriaId: id }); // Assumindo que usa o mesmo screen para criar/editar
+      navigation.navigate('EditCategoria', { categoriaId: id }); // Assumindo que usa o mesmo screen para criar/editar
       return;
     }
 
@@ -125,12 +140,13 @@ const HomeScreen: React.FC = () => {
     dispatch(setCategoriaAtiva(id) as any);
   };
 
-  const handleStatPress = (statId: string, label: string) => {
-    navigation.navigate('LembretesList', { 
-      filterType: statId,   
-      filterTitle: label    
-    });
-  };
+ const handleStatPress = (statId: string, label: string) => {
+  navigation.navigate('LembretesList', { 
+    filterType: statId,
+    filterTitle: label,
+    categoriaId: String(categoriaAtivaId || ID_TODOS),
+  });
+};
 
   const confirmDeleteCategorias = () => {
     if (selectedDeleteIds.length === 0) return;
@@ -147,9 +163,13 @@ const HomeScreen: React.FC = () => {
             for (const id of selectedDeleteIds) {
               await dispatch(deleteCategoria(id) as any);
             }
+            //Se a categoria ativa foi apagada, volta para "Todos"
+            if(selectedDeleteIds.includes(String(categoriaAtivaId))) {
+              dispatch(setCategoriaAtiva(ID_TODOS) as any);
+            }
             if (userId) {
               dispatch(fetchCategorias(userId) as any);
-              dispatch(fetchLembretes(userId) as any); // Lembretes podem ficar sem categoria
+              dispatch(fetchLembretes(userId) as any);
             }
             exitModes();
           },

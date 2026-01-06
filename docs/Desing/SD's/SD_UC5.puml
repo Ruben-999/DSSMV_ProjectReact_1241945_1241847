@@ -1,0 +1,43 @@
+@startuml
+' SD – UC5 Edit Category
+' Updated flow: HomeScreen → Edit Mode → EditCategoryScreen
+' Aligned with final SSD and PingMe2 React architecture (Redux, no Service layer)
+
+autonumber
+
+actor "User" as user
+participant "HomeScreen" as HomeUI
+participant "EditCategoryScreen" as EditUI
+participant "CategoryActions" as Actions
+participant "CategoryReducer" as Reducer
+participant "API (fetch)" as API
+
+user -> HomeUI: Presses "Edit Categories Button"
+HomeUI -> HomeUI: Enters edit mode
+
+user -> HomeUI: Selects category to edit
+HomeUI -> EditUI: Navigates to EditCategoryScreen\n(categoryId)
+
+user -> EditUI: Modifies category data
+user -> EditUI: Confirms changes
+
+EditUI -> Actions: updateCategoryStarted()
+Actions -> Reducer: set loading = true
+Reducer --> EditUI: updated state
+
+EditUI -> Actions: updateCategory(categoryData)
+Actions -> API: fetch(PUT /categories/{id}, categoryData)
+
+alt Data is valid
+  API --> Actions: success(response)
+  Actions -> Reducer: updateCategorySuccess(category)
+  Reducer --> EditUI: updated state
+  EditUI --> user: Shows success message\n(Category updated)
+else Data is invalid
+  API --> Actions: failure(error)
+  Actions -> Reducer: updateCategoryFailure(error)
+  Reducer --> EditUI: updated state
+  EditUI --> user: Shows error message\n(Invalid data)
+end
+
+@enduml

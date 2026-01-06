@@ -1,0 +1,39 @@
+@startuml
+' 3.3 Code Organization – PingMe2
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "PingMe2" {
+
+  component "App"
+
+  component "UI Screens" as UI
+
+  component "Redux Provider" as Provider
+  component "Redux Store" as Store
+  component "Reducers" as Reducers
+  component "Actions" as Actions
+
+  component "Reusable Components" as Components
+  component "Assets" as Assets
+
+  component "Network\n(fetch)" as Fetch
+}
+
+' --- Code dependencies (dashed, like the example) ---
+
+App ..> UI
+
+UI ..> Provider
+Provider ..> Store
+
+Store ..> Reducers
+Reducers ..> Actions
+
+UI ..> Components
+Components ..> Assets
+
+Actions ..> Fetch
+
+@enduml

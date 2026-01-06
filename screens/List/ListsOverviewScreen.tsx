@@ -99,6 +99,10 @@ const ListsOverviewScreen: React.FC = () => {
       <TouchableOpacity
         style={[
           styles.card,
+          {
+            backgroundColor:
+              item.cor_hex ?? '#1e1e1e',
+          },
           isSelected && styles.cardSelected,
         ]}
         onLongPress={() => {
@@ -111,7 +115,9 @@ const ListsOverviewScreen: React.FC = () => {
           if (selectionMode) {
             toggleSelect(id, item.is_default);
           } else {
-            navigation.navigate('ListDetails', { listaId: item.id });
+            navigation.navigate('ListDetails', {
+              listaId: item.id,
+            });
           }
         }}
       >
@@ -126,7 +132,7 @@ const ListsOverviewScreen: React.FC = () => {
           <Ionicons
             name="chevron-forward"
             size={18}
-            color="#555"
+            color="#e5e7eb"
           />
         )}
       </TouchableOpacity>
@@ -169,7 +175,9 @@ const ListsOverviewScreen: React.FC = () => {
         keyExtractor={i => String(i.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={() => (
+          <View style={styles.separator} />
+        )}
       />
     </SafeAreaView>
   );
@@ -179,13 +187,20 @@ export default ListsOverviewScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#121212' },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 16,
     alignItems: 'center',
   },
-  title: { color: '#fff', fontSize: 20, fontWeight: '700' },
+
+  title: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+
   addBtn: {
     width: 34,
     height: 34,
@@ -194,30 +209,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   selectionBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
-  selectionText: { color: '#fff', fontWeight: '600' },
-  deleteAction: { color: '#ef4444', fontWeight: '700' },
-  cancelAction: { color: '#aaa', fontWeight: '600' },
+
+  selectionText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+
+  deleteAction: {
+    color: '#ef4444',
+    fontWeight: '700',
+  },
+
+  cancelAction: {
+    color: '#aaa',
+    fontWeight: '600',
+  },
+
   listContent: { padding: 16 },
+
   card: {
-    backgroundColor: '#1e1e1e',
     padding: 16,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+
   cardSelected: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#ef4444',
   },
-  cardTitle: { color: '#fff', fontWeight: '600', fontSize: 16 },
-  cardCount: { color: '#aaa', marginTop: 6 },
+
+  cardTitle: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+
+  cardCount: {
+    color: '#e5e7eb',
+    marginTop: 6,
+  },
+
   separator: { height: 12 },
 });

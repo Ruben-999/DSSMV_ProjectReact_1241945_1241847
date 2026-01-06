@@ -1,0 +1,30 @@
+@startuml
+' Physical Architecture – PingMe2
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+node "Mobile Device\n(Android / iOS)" {
+
+  component "PingMe2 Mobile App" {
+    component "UI Screens\n(Home, Lists, Reminders)"
+    component "Redux Store\n(Actions, Reducers)"
+    component "Network Layer\n(fetch)"
+  }
+
+}
+
+node "Backend Server" {
+
+  component "PingMe2 REST API" {
+    component "Authentication Endpoints"
+    component "Lists & Reminders Endpoints"
+  }
+
+  database "Database"
+}
+
+"Network Layer\n(fetch)" --> "PingMe2 REST API" : HTTP / HTTPS
+"PingMe2 REST API" --> "Database" : CRUD Operations
+
+@enduml

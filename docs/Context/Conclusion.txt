@@ -1,0 +1,7 @@
+In conclusion, the objectives defined at the beginning of the PingMe2 project were successfully achieved. The developed application implements all the planned functionalities, providing users with an effective solution for managing reminders, categories, and lists through an intuitive mobile interface.
+
+Throughout the development process, no major obstacles were encountered that compromised the implementation, which allowed the project to progress in a structured and clear manner. The use of React Native enabled the creation of a modular and maintainable application, while Redux ensured consistent and centralized state management across the system.
+
+Additionally, this project contributed significantly to a deeper understanding of mobile application development and client–server architectures. The interaction with a RESTful API allowed the exploration of all CRUD operations, extending beyond simple data retrieval to include creation, update, and deletion of resources. This experience reinforced the importance of clear separation between frontend and backend responsibilities.
+
+Overall, the PingMe2 project provided valuable practical experience with modern mobile development technologies and architectural patterns, consolidating both theoretical and practical knowledge acquired throughout the course.

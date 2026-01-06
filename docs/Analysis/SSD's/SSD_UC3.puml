@@ -1,0 +1,14 @@
+@startuml
+' SSD – UC3 Logout User
+
+autonumber
+
+actor "User" as user
+participant System as sys
+
+
+user -> sys: Selects "Logout"
+sys -> sys: Clear session data
+sys --> user: Informs operation success\n(Session ended)
+
+@enduml

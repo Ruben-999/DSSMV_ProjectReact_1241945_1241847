@@ -6,13 +6,19 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
+import { Ionicons } from '@expo/vector-icons';
 
 import { RootState } from '../../redux/reducers';
 import { updateCategoria } from '../../redux/actions/categoriaActions';
+import {
+  updateLembrete,
+  fetchLembretes,
+} from '../../redux/actions/lembreteActions';
 
 type RouteParams = {
   categoriaId: string;
@@ -25,21 +31,39 @@ const EditCategoriaScreen: React.FC = () => {
 
   const { categoriaId } = route.params as RouteParams;
 
+  // --- REDUX ---
   const categoria = useSelector((s: RootState) =>
     s.categorias.items.find(
       (c) => String(c.id) === String(categoriaId)
     )
   );
 
-  const [nome, setNome] = useState('');
+  const lembretes = useSelector((s: RootState) => s.lembretes.items);
+  const userId = useSelector((s: RootState) => s.auth.user?.id);
 
+  // --- STATE ---
+  const [nome, setNome] = useState('');
+  const [selectedLembreteIds, setSelectedLembreteIds] = useState<string[]>([]);
+
+  // --- INIT ---
   useEffect(() => {
     if (categoria) {
       setNome(categoria.nome);
     }
   }, [categoria]);
 
-  const handleSave = () => {
+  useEffect(() => {
+    if (!categoria) return;
+
+    const ids = lembretes
+      .filter((l) => String(l.categoria_id) === String(categoria.id))
+      .map((l) => String(l.id));
+
+    setSelectedLembreteIds(ids);
+  }, [categoria, lembretes]);
+
+  // --- SAVE ---
+  const handleSave = async () => {
     if (!nome.trim()) {
       Alert.alert('Erro', 'O nome da categoria é obrigatório.');
       return;
@@ -50,12 +74,50 @@ const EditCategoriaScreen: React.FC = () => {
       return;
     }
 
-    // ✅ AQUI ESTAVA O ERRO — agora está correto
-    dispatch(
+    // 1️⃣ Atualizar categoria
+    await dispatch(
       updateCategoria(categoria.id, {
         nome: nome.trim(),
       }) as any
     );
+
+    // 2️⃣ Diferenças nos lembretes
+    const lembretesParaAdicionar = lembretes.filter(
+      (l) =>
+        selectedLembreteIds.includes(String(l.id)) &&
+        String(l.categoria_id) !== String(categoria.id)
+    );
+
+    const lembretesParaRemover = lembretes.filter(
+      (l) =>
+        !selectedLembreteIds.includes(String(l.id)) &&
+        String(l.categoria_id) === String(categoria.id)
+    );
+
+    // 3️⃣ Aplicar updates
+
+    // ➕ adicionar à categoria
+    for (const l of lembretesParaAdicionar) {
+      await dispatch(
+        updateLembrete(l.id, {
+          categoria_id: Number(categoria.id),
+        }) as any
+      );
+    }
+
+    // ➖ remover da categoria
+    for (const l of lembretesParaRemover) {
+      await dispatch(
+        updateLembrete(l.id, {
+          categoria_id: null,
+        }) as any
+      );
+    }
+
+    // 4️⃣ Refresh e sair
+    if (userId) {
+      dispatch(fetchLembretes(userId) as any);
+    }
 
     navigation.goBack();
   };
@@ -68,6 +130,7 @@ const EditCategoriaScreen: React.FC = () => {
     );
   }
 
+  // --- UI ---
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -82,7 +145,7 @@ const EditCategoriaScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.label}>Nome</Text>
         <TextInput
           style={styles.input}
@@ -91,7 +154,36 @@ const EditCategoriaScreen: React.FC = () => {
           placeholder="Nome da categoria"
           placeholderTextColor="#666"
         />
-      </View>
+
+        <Text style={[styles.label, { marginTop: 24 }]}>
+          Lembretes desta categoria
+        </Text>
+
+        {lembretes.map((l) => {
+          const checked = selectedLembreteIds.includes(String(l.id));
+
+          return (
+            <TouchableOpacity
+              key={l.id}
+              style={styles.lembreteRow}
+              onPress={() => {
+                setSelectedLembreteIds((prev) =>
+                  checked
+                    ? prev.filter((id) => id !== String(l.id))
+                    : [...prev, String(l.id)]
+                );
+              }}
+            >
+              <Text style={styles.lembreteText}>{l.titulo}</Text>
+              <Ionicons
+                name={checked ? 'checkbox' : 'square-outline'}
+                size={22}
+                color={checked ? '#22c55e' : '#777'}
+              />
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -150,5 +242,19 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     fontSize: 16,
+  },
+
+  lembreteRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#222',
+  },
+
+  lembreteText: {
+    color: '#fff',
+    fontSize: 15,
   },
 });

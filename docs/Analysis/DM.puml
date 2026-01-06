@@ -1,0 +1,92 @@
+@startuml
+title PingMe2 - Domain Model
+
+skinparam classAttributeIconSize 0
+
+' =========================
+' Domain Entities
+' =========================
+
+class User {
+  +id: String
+  +name: String
+  +email: String
+  +password: String
+  +createdAt: DateTime
+}
+
+class Category {
+  +id: String
+  +userId: String
+  +name: String
+  +state: String
+  +isDefault: Boolean
+  +createdAt: DateTime
+}
+
+class List {
+  +id: String
+  +userId: String
+  +name: String
+  +description: String
+  +colorHex: String
+  +isDefault: Boolean
+  +createdAt: DateTime
+}
+
+class Reminder {
+  +id: String
+  +userId: String
+  +title: String
+  +description: String
+  +dueDate: Date
+  +dueTime: Time
+  +priority: Priority
+  +isCompleted: Boolean
+  +createdAt: DateTime
+}
+
+' =========================
+' Enums / Value Objects
+' =========================
+
+enum Priority {
+  NULL
+  LOW
+  MEDIUM
+  HIGH
+}
+
+' =========================
+' Relationships
+' =========================
+
+User "1" --> "0..*" Category : owns
+User "1" --> "0..*" List : owns
+User "1" --> "0..*" Reminder : owns
+
+Category "1" --> "0..*" Reminder : categorizes
+
+List "1" --> "0..*" Reminder : contains
+
+' =========================
+' Constraints / Notes
+' =========================
+
+note right of Category
+- Each category belongs to one user
+- One default category ("All") per user
+end note
+
+note right of List
+- Lists are optional groupings
+- A reminder may belong to zero or one list
+end note
+
+note right of Reminder
+- A reminder belongs to exactly one user
+- Category is mandatory
+- List is optional
+end note
+
+@enduml

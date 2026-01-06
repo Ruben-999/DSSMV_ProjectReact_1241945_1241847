@@ -15,20 +15,63 @@ import RegisterScreen from '../screens/auth/RegisterScreen';
 
 // --- SCREENS APP ---
 import HomeScreen from '../screens/app/HomeScreen';
-import CreateCategoriaScreen from '../screens/Categorias/CreateCategoriaScreen';
-import CreateListaScreen from '../screens/List/CreateListaScreen';
-import ListsOverviewScreen from '../screens/List/ListsOverviewScreen';
-import ListDetailsScreen from '../screens/List/ListDetailsScreen';
 import CreateLembreteScreen from '../screens/lembretes/CreateLembreteScreen';
 import LembretesListScreen from '../screens/lembretes/LembretesListScreen';
-import EditListScreen from '../screens/List/EditListaScreen';
 
-const Stack = createNativeStackNavigator();
+import CreateCategoriaScreen from '../screens/Categorias/CreateCategoriaScreen';
+import EditCategoriaScreen from '../screens/Categorias/EditCategoriaScreen';
+
+import ListsOverviewScreen from '../screens/List/ListsOverviewScreen';
+import ListDetailsScreen from '../screens/List/ListDetailsScreen';
+import CreateListaScreen from '../screens/List/CreateListaScreen';
+import EditListScreen from '../screens/List/EditListaScreen';
+import AddLembreteToLista from '../screens/List/AddLembreteToListaScreen';
+import AddLembreteToListaScreen from '../screens/List/AddLembreteToListaScreen';
+
+// ================= STACKS =================
+
+const AuthStack = createNativeStackNavigator();
+const AppStack = createNativeStackNavigator();
+
+// ================= AUTH STACK =================
+
+const AuthNavigator = () => (
+  <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+    <AuthStack.Screen name="Initial" component={InitialScreen} />
+    <AuthStack.Screen name="Login" component={LoginScreen} />
+    <AuthStack.Screen name="Register" component={RegisterScreen} />
+  </AuthStack.Navigator>
+);
+
+// ================= APP STACK =================
+
+const AppNavigatorStack = () => (
+  <AppStack.Navigator screenOptions={{ headerShown: false }}>
+    {/* ROOT */}
+    <AppStack.Screen name="Home" component={HomeScreen} />
+
+    {/* LEMBRETES */}
+    <AppStack.Screen name="CreateLembrete" component={CreateLembreteScreen} />
+    <AppStack.Screen name="LembretesList" component={LembretesListScreen} />
+
+    {/* CATEGORIAS */}
+    <AppStack.Screen name="CreateCategoria" component={CreateCategoriaScreen} />
+    <AppStack.Screen name="EditCategoria" component={EditCategoriaScreen} />
+
+    {/* LISTAS */}
+    <AppStack.Screen name="ListsOverview" component={ListsOverviewScreen} />
+    <AppStack.Screen name="ListDetails" component={ListDetailsScreen} />
+    <AppStack.Screen name="CreateLista" component={CreateListaScreen} />
+    <AppStack.Screen name="EditList" component={EditListScreen} />
+    <AppStack.Screen name="AddLembreteToLista" component={AddLembreteToListaScreen} />
+  </AppStack.Navigator>
+);
+
+// ================= ROOT NAVIGATOR =================
 
 export const AppNavigator = () => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   useEffect(() => {
@@ -48,7 +91,6 @@ export const AppNavigator = () => {
     checkSession();
   }, [dispatch]);
 
-  // Splash / loading inicial
   if (isCheckingSession) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -59,29 +101,7 @@ export const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          // --- STACK APP ---
-          <>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="CreateLembrete" component={CreateLembreteScreen} />
-            <Stack.Screen name="CreateCategoria" component={CreateCategoriaScreen} />
-            <Stack.Screen name="EditCategoria" component={CreateCategoriaScreen} />
-            <Stack.Screen name="CreateLista" component={CreateListaScreen} />
-            <Stack.Screen name="EditList" component={EditListScreen} />
-            <Stack.Screen name="ListsOverview" component={ListsOverviewScreen} />
-            <Stack.Screen name="ListDetails" component={ListDetailsScreen} />
-            <Stack.Screen name="LembretesList" component={LembretesListScreen} />
-          </>
-        ) : (
-          // --- STACK AUTH ---
-          <>
-            <Stack.Screen name="Initial" component={InitialScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-          </>
-        )}
-      </Stack.Navigator>
+      {isAuthenticated ? <AppNavigatorStack /> : <AuthNavigator />}
     </NavigationContainer>
   );
 };
