@@ -1,0 +1,1169 @@
+\documentclass[runningheads,a4paper]{llncs}
+
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{url}
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinelanguage{TypeScript}{
+  keywords={const, let, export, async, await, return, if, else, case},
+  keywordstyle=\color{blue},
+  sensitive=true,
+  comment=[l]{//},
+  commentstyle=\color{gray},
+  stringstyle=\color{teal},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{
+  language=TypeScript,
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  numbers=left,
+  numberstyle=\tiny,
+  tabsize=2,
+  showstringspaces=false,
+  frame=single,
+  framesep=6pt,
+  aboveskip=1.2em,
+  belowskip=1.2em,
+  xleftmargin=1.5em
+}
+\newenvironment{codeblock}
+{\par\medskip\noindent\begin{minipage}{\linewidth}}
+{\end{minipage}\par\medskip}
+
+
+\begin{document}
+
+\mainmatter
+
+\title{DSSMV -- Project React Report}
+\titlerunning{PingMe2 Mobile Application Report}
+
+\author{Tiago Caetano -- 1241945 \and Ruben Remelhe -- 1241847}
+
+\institute{
+Instituto Superior de Engenharia do Porto - ISEP\\
+Licenciatura em Engenharia de Telecomunicações e Informática - LETI\\
+DSSMV -- Desenvolvimento de Software para Dispositivos Móveis
+}
+
+\maketitle
+
+\begin{abstract}
+PingMe2 is a mobile application designed to support personal task
+management through reminders, lists, and categories. The application
+emphasizes state consistency, modular architecture, and a clear
+separation between presentation and business logic. This report
+describes the system objectives, architectural decisions, and the
+implementation strategies adopted during development.
+\keywords{Mobile Application, Task Management, React Native, Redux}
+\end{abstract}
+
+\section{Context}
+
+This project consists of the development of an Android mobile application named PingMe2, whose main goal is to support users in managing daily tasks in an organized and efficient manner. The application provides a digital task and reminder management system that enables users to create, organize, and monitor their activities over time.
+
+PingMe2 follows a client--server architecture and interacts with a RESTful API responsible for all data management operations. Through this interaction, the application supports the full set of CRUD operations, allowing users to create, retrieve, update, and delete reminders, categories, and lists. This architectural approach ensures a clear separation of concerns between the mobile client and the backend services.
+
+The primary objective of PingMe2 is to help users structure their daily routines by offering intuitive task organization mechanisms, including categorization, list grouping, completion tracking, and filtering. By combining a mobile user interface with a RESTful backend, the project demonstrates a modern software development approach commonly adopted in contemporary mobile applications.
+
+\section{Analysis}
+
+\subsection{Domain Model}
+
+The domain model presents the main entities of the PingMe2 system and
+their relationships, providing a conceptual view of the application's
+data structure. It defines the core elements involved in task
+management, such as users, reminders, categories, and lists, as well as
+the associations between them.
+This model serves as the foundation for the system design and
+implementation, ensuring consistency between requirements, business
+logic, and data representation throughout the application.
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{images/diagrams/DM-PingMe2___Domain_Model.png}
+\caption{Domain Model}
+\label{fig:domain-model}
+\end{figure}
+
+\subsection{Non-functional Requirements}
+This section describes the non-functional requirements of the PingMe2
+application. These requirements define quality attributes and
+constraints related to performance, usability, security, reliability,
+and maintainability of the system.
+
+\paragraph{Usability}
+
+\begin{itemize}
+  \item \textbf{NFR-01}: The system shall provide an intuitive and user-friendly mobile interface suitable for daily use.
+  \item \textbf{NFR-02}: The system shall ensure that common operations can be performed with a minimal number of user interactions.
+  \item \textbf{NFR-03}: The system shall provide clear visual feedback for user actions, including loading, success, and error states.
+\end{itemize}
+
+\paragraph{Performance}
+
+\begin{itemize}
+  \item \textbf{NFR-04}: The system shall respond to user interactions within an acceptable time frame under normal operating conditions.
+  \item \textbf{NFR-05}: The system shall handle multiple user requests without significant degradation of performance.
+\end{itemize}
+
+\paragraph{Reliability and Availability}
+
+\begin{itemize}
+  \item \textbf{NFR-06}: The system shall maintain consistent behavior during normal operation and recover gracefully from errors.
+  \item \textbf{NFR-07}: The system shall provide appropriate error handling and recovery mechanisms in case of network or service failures.
+\end{itemize}
+
+\paragraph{Security}
+
+\begin{itemize}
+  \item \textbf{NFR-08}: The system shall restrict access to data based on user authentication and authorization.
+  \item \textbf{NFR-09}: The system shall ensure that user data is securely transmitted between the client and the backend services.
+\end{itemize}
+
+\paragraph{Maintainability and Extensibility}
+
+\begin{itemize}
+  \item \textbf{NFR-10}: The system shall follow a modular architecture to facilitate maintenance and future extensions.
+  \item \textbf{NFR-11}: The system shall allow new features to be added with minimal impact on existing functionality.
+\end{itemize}
+
+\paragraph{Portability}
+
+\begin{itemize}
+  \item \textbf{NFR-12}: The system shall be deployable on Android devices supporting modern versions of the operating system.
+\end{itemize}
+
+\subsection{Functional Requirements}
+This section describes the functional requirements of the PingMe2
+application. Each requirement specifies a behavior or capability that
+the system must provide in order to support task, list, and category
+management for authenticated users.
+
+\paragraph{User Authentication}
+
+\begin{itemize}
+  \item \textbf{FR-01}: The system shall allow users to register using an email and password.
+  \item \textbf{FR-02}: The system shall allow users to log in using valid credentials.
+  \item \textbf{FR-03}: The system shall allow users to log out, clearing all session-related data.
+\end{itemize}
+
+\paragraph{User Profile Management}
+
+\begin{itemize}
+  \item \textbf{FR-05}: The system shall associate all data (categories, lists, reminders) with a single authenticated user.
+  \item \textbf{FR-06}: The system shall prevent users from accessing data belonging to other users.
+\end{itemize}
+
+\paragraph{Category Management}
+
+\begin{itemize}
+  \item \textbf{FR-07}: The system shall allow users to create custom categories.
+  \item \textbf{FR-08}: The system shall allow users to edit existing categories.
+  \item \textbf{FR-09}: The system shall allow users to delete categories.
+  \item \textbf{FR-10}: The system shall always provide a default category (e.g., ``All'') that cannot be deleted.
+  \item \textbf{FR-11}: The system shall allow one active category to be selected at a time.
+  \item \textbf{FR-12}: The system shall filter reminders based on the currently active category.
+\end{itemize}
+
+\paragraph{List Management}
+
+\begin{itemize}
+  \item \textbf{FR-13}: The system shall allow users to create lists.
+  \item \textbf{FR-14}: The system shall allow users to edit list details, including name, description, and color.
+  \item \textbf{FR-15}: The system shall allow users to delete lists.
+  \item \textbf{FR-16}: The system shall display all reminders associated with a selected list.
+  \item \textbf{FR-17}: The system shall allow reminders to belong to zero or one list.
+\end{itemize}
+
+\paragraph{Reminder Management}
+
+\begin{itemize}
+  \item \textbf{FR-18}: The system shall allow users to create reminders.
+  \item \textbf{FR-19}: The system shall allow users to edit reminder details, including title, description, date, time, priority, location, and images.
+  \item \textbf{FR-20}: The system shall allow users to delete reminders.
+  \item \textbf{FR-21}: The system shall allow users to mark reminders as completed or not completed.
+  \item \textbf{FR-22}: The system shall allow reminders to be assigned to exactly one category.
+  \item \textbf{FR-23}: The system shall allow reminders to be optionally assigned to one list.
+\end{itemize}
+
+\paragraph{Reminder Filtering and Organization}
+
+\begin{itemize}
+  \item \textbf{FR-24}: The system shall display reminders due on the current day.
+  \item \textbf{FR-25}: The system shall display completed reminders separately.
+  \item \textbf{FR-26}: The system shall allow reminders to be filtered by category.
+  \item \textbf{FR-27}: The system shall allow reminders to be grouped by list.
+\end{itemize}
+
+\paragraph{Priority Management}
+
+\begin{itemize}
+  \item \textbf{FR-28}: The system shall support multiple reminder priority levels (None, Low, Medium, High).
+  \item \textbf{FR-29}: The system shall visually distinguish reminders based on their priority level.
+\end{itemize}
+
+\paragraph{Data Synchronization and Persistence}
+
+\begin{itemize}
+  \item \textbf{FR-30}: The system shall persist user data remotely using a backend service.
+  \item \textbf{FR-31}: The system shall synchronize reminders, categories, and lists across devices.
+  \item \textbf{FR-32}: The system shall handle loading and error states during data synchronization.
+\end{itemize}
+
+\paragraph{Navigation and Usability}
+
+\begin{itemize}
+  \item \textbf{FR-33}: The system shall provide navigation between Home, Lists, Categories, and Reminder creation screens.
+  \item \textbf{FR-34}: The system shall provide feedback messages for successful and failed operations.
+  \item \textbf{FR-35}: The system shall prevent invalid operations, such as creating reminders without required fields.
+\end{itemize}
+
+\subsection{System Sequence Diagrams (SSDs)}
+
+This section presents the System Sequence Diagrams (SSDs) for the main
+use cases of the PingMe2 application. Each use case is documented by its
+specification table followed by the corresponding SSD.
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/UC_Diagram-PingMe2___Use_Case_Diagram.png}
+\caption{Use Case Diagram for PingMe2 Application}
+\end{figure}
+\clearpage
+% =====================================================
+% UC1 – Register User
+% =====================================================
+\paragraph{UC1 -- Register User}
+
+\begin{table}
+\caption{Use Case UC1 -- Register User}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Allows a new user to create an account in the system (Create operation). \\
+Pre-Conditions & The user is not authenticated and has an active internet connection. \\
+Post-Conditions & A new user account is created and stored in the database. \\
+Basic Flow &
+1. The user enters registration data (name, email, password);\\
+& 2. The user confirms the registration;\\
+& 3. The system validates the provided data;\\
+& 4. The system sends the data to the backend API;\\
+& 5. The system confirms success and creates the account. \\
+Alternative Flow &
+Invalid or incomplete data: the system rejects the request and displays an error message. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC1.png}
+\caption{System Sequence Diagram for UC1 -- Register User}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC2 – Login User
+% =====================================================
+\paragraph{UC2 -- Login User}
+
+\begin{table}
+\caption{Use Case UC2 -- Login User}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Authenticates a user in the system (Read operation). \\
+Pre-Conditions & The user has a registered account and an active internet connection. \\
+Post-Conditions & The user is authenticated and gains access to the application. \\
+Basic Flow &
+1. The user enters email and password;\\
+& 2. The user submits the login form;\\
+& 3. The system validates the credentials;\\
+& 4. The system authenticates the user via the backend API;\\
+& 5. The system grants access to the application. \\
+Alternative Flow &
+Invalid credentials: the system denies access and displays an error message. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC2.png}
+\caption{System Sequence Diagram for UC2 -- Login User}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC3 – Logout User
+% =====================================================
+\paragraph{UC3 -- Logout User}
+
+\begin{table}
+\caption{Use Case UC3 -- Logout User}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Ends the user session (Update operation). \\
+Pre-Conditions & The user is authenticated. \\
+Post-Conditions & The user session is terminated. \\
+Basic Flow &
+1. The user selects the logout option;\\
+& 2. The system clears session-related data;\\
+& 3. The system redirects the user to the login screen. \\
+Alternative Flow &
+Not applicable. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC3.png}
+\caption{System Sequence Diagram for UC3 -- Logout User}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC5 – Edit Category
+% =====================================================
+\paragraph{UC5 -- Edit Category}
+
+\begin{table}
+\caption{Use Case UC5 -- Edit Category}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Updates an existing category (Update operation). \\
+Pre-Conditions & The user is authenticated and the category exists. \\
+Post-Conditions & The category information is updated. \\
+Basic Flow &
+1. The user selects a category;\\
+& 2. The user edits the category details;\\
+& 3. The system validates the data;\\
+& 4. The system updates the category via the backend API;\\
+& 5. The system confirms success. \\
+Alternative Flow &
+Invalid data: the system rejects the update. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC5.png}
+\caption{System Sequence Diagram for UC5 -- Edit Category}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC7 – Select Active Category
+% =====================================================
+\paragraph{UC7 -- Select Active Category}
+
+\begin{table}
+\caption{Use Case UC7 -- Select Active Category}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Sets a category as the active filter (Update operation). \\
+Pre-Conditions & The user is authenticated and categories exist. \\
+Post-Conditions & The selected category becomes the active filter. \\
+Basic Flow &
+1. The user selects a category;\\
+& 2. The system marks the category as active;\\
+& 3. The system updates the displayed reminders. \\
+Alternative Flow &
+Category not found: the system keeps the previous selection. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC7.png}
+\caption{System Sequence Diagram for UC7 -- Select Active Category}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC8 – Create List
+% =====================================================
+\paragraph{UC8 -- Create List}
+
+\begin{table}
+\caption{Use Case UC8 -- Create List}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Creates a new list to group reminders (Create operation). \\
+Pre-Conditions & The user is authenticated and has an active internet connection. \\
+Post-Conditions & A new list is added to the system. \\
+Basic Flow &
+1. The user enters list details;\\
+& 2. The user confirms creation;\\
+& 3. The system validates the data;\\
+& 4. The system stores the list via the backend API;\\
+& 5. The system confirms success. \\
+Alternative Flow &
+Invalid data: the system rejects the creation. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC8.png}
+\caption{System Sequence Diagram for UC8 -- Create List}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC10 – Delete List
+% =====================================================
+\paragraph{UC10 -- Delete List}
+
+\begin{table}
+\caption{Use Case UC10 -- Delete List}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Removes an existing list from the system (Delete operation). \\
+Pre-Conditions & The user is authenticated and the list exists. \\
+Post-Conditions & The list is removed from the system. \\
+Basic Flow &
+1. The user selects a list;\\
+& 2. The user confirms the deletion;\\
+& 3. The system deletes the list via the backend API;\\
+& 4. The system updates the user interface. \\
+Alternative Flow &
+Deletion cancelled: no changes are made. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC10.png}
+\caption{System Sequence Diagram for UC10 -- Delete List}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC12 – Create Reminder
+% =====================================================
+\paragraph{UC12 -- Create Reminder}
+
+\begin{table}
+\caption{Use Case UC12 -- Create Reminder}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Creates a new reminder in the system (Create operation). \\
+Pre-Conditions & The user is authenticated and has an active internet connection. \\
+Post-Conditions & A new reminder is added to the system. \\
+Basic Flow &
+1. The user enters reminder details;\\
+& 2. The user submits the form;\\
+& 3. The system validates the data;\\
+& 4. The system stores the reminder via the backend API;\\
+& 5. The system confirms success. \\
+Alternative Flow &
+Invalid data: the system displays an error message. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC12.png}
+\caption{System Sequence Diagram for UC12 -- Create Reminder}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC13 – Edit Reminder
+% =====================================================
+\paragraph{UC13 -- Edit Reminder}
+
+\begin{table}
+\caption{Use Case UC13 -- Edit Reminder}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Updates an existing reminder (Update operation). \\
+Pre-Conditions & The user is authenticated and the reminder exists. \\
+Post-Conditions & The reminder is updated. \\
+Basic Flow &
+1. The user selects a reminder;\\
+& 2. The user edits its details;\\
+& 3. The system validates the data;\\
+& 4. The system updates the reminder via the backend API;\\
+& 5. The system confirms success. \\
+Alternative Flow &
+Invalid data: the update is rejected. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC13.png}
+\caption{System Sequence Diagram for UC13 -- Edit Reminder}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC14 – Delete Reminder
+% =====================================================
+\paragraph{UC14 -- Delete Reminder}
+
+\begin{table}
+\caption{Use Case UC14 -- Delete Reminder}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Deletes a reminder from the system (Delete operation). \\
+Pre-Conditions & The user is authenticated and the reminder exists. \\
+Post-Conditions & The reminder is removed from the system. \\
+Basic Flow &
+1. The user selects a reminder;\\
+& 2. The user confirms the deletion;\\
+& 3. The system deletes the reminder via the backend API;\\
+& 4. The system updates the list of reminders. \\
+Alternative Flow &
+Deletion cancelled: no changes are made. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC14.png}
+\caption{System Sequence Diagram for UC14 -- Delete Reminder}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC15 – Mark Reminder as Completed
+% =====================================================
+\paragraph{UC15 -- Mark Reminder as Completed}
+
+\begin{table}
+\caption{Use Case UC15 -- Mark Reminder as Completed}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Marks a reminder as completed (Update operation). \\
+Pre-Conditions & The user is authenticated and the reminder exists. \\
+Post-Conditions & The reminder status is updated to completed. \\
+Basic Flow &
+1. The user selects a reminder;\\
+& 2. The user marks it as completed;\\
+& 3. The system updates the status via the backend API;\\
+& 4. The system refreshes the user interface. \\
+Alternative Flow &
+Update fails: the system displays an error message. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC15.png}
+\caption{System Sequence Diagram for UC15 -- Mark Reminder as Completed}
+\end{figure}
+
+\clearpage
+
+% =====================================================
+% UC17 – View Completed Reminders
+% =====================================================
+\paragraph{UC17 -- View Completed Reminders}
+
+\begin{table}
+\caption{Use Case UC17 -- View Completed Reminders}
+\centering
+\begin{tabular}{p{3.5cm} p{9cm}}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Description & Displays all completed reminders (Read operation). \\
+Pre-Conditions & The user is authenticated. \\
+Post-Conditions & Completed reminders are displayed. \\
+Basic Flow &
+1. The user navigates to the completed reminders view;\\
+& 2. The system retrieves completed reminders;\\
+& 3. The system displays the results. \\
+Alternative Flow &
+No completed reminders: the system displays an empty state. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SSD_UC17.png}
+\caption{System Sequence Diagram for UC17 -- View Completed Reminders}
+\end{figure}
+
+\clearpage
+
+It was decided not to document in detail the following Use Cases:
+UC4, UC6, UC9, UC11, and UC16. This decision was made because these Use
+Cases present interaction flows and functional behavior very similar to
+other Use Cases that were already documented, differing mainly in the
+entity being manipulated or in minor contextual aspects.
+
+In order to avoid redundancy and keep the documentation clear and
+concise, representative Use Cases were selected and documented. These
+are considered sufficient to describe the system’s overall behavior.
+The table below highlights the correspondence between the non-documented
+Use Cases and the similar Use Cases that were documented.
+
+\begin{table}
+\caption{Mapping between non-documented Use Cases and similar documented Use Cases}
+\centering
+\begin{tabular}{p{5cm} p{6cm}}
+\hline
+\textbf{Non-documented Use Case} & \textbf{Similar documented Use Case} \\
+\hline
+UC4 -- Create Category & UC8 -- Create List; UC12 -- Create Reminder \\
+UC6 -- Delete Category & UC10 -- Delete List; UC14 -- Delete Reminder \\
+UC9 -- Edit List & UC5 -- Edit Category; UC13 -- Edit Reminder \\
+UC11 -- View List Details & UC17 -- View Completed Reminders \\
+UC16 -- View Today’s Reminders & UC17 -- View Completed Reminders \\
+\hline
+\end{tabular}
+\end{table}
+\clearpage
+
+\section{Design}
+
+\subsection{Physical Architecture}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.9\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/Physical_Architecture.png}
+\caption{Physical Architecture of the PingMe2 Application}
+\label{fig:physical-architecture}
+\end{figure}
+\clearpage
+
+\subsection{Logical Architecture}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.65\textwidth,
+  height=0.65\textheight,
+  keepaspectratio
+]{images/diagrams/Logic_Architecture.png}
+\caption{Logical Architecture of the PingMe2 Application}
+\label{fig:logical-architecture}
+\end{figure}
+\clearpage
+
+\subsection{Code Organization}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.5\textwidth,
+  height=0.5\textheight,
+  keepaspectratio
+]{images/diagrams/Code_Organization.png}
+\caption{Code Organization and Project Structure of PingMe2}
+\label{fig:code-organization}
+\end{figure}
+\clearpage
+
+\subsection{Design Sequence Diagrams (SDs)}
+
+This section presents the Design Sequence Diagrams (SDs) for the main
+use cases of the PingMe2 application. These diagrams provide a more
+detailed view of the internal interactions between the system
+components, reflecting the design-level responsibilities and message
+exchanges.
+
+\paragraph{UC1 -- Register User}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC1.png}
+\caption{Design Sequence Diagram for UC1 -- Register User}
+\label{fig:sd-uc1}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC2 -- Login User}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC2.png}
+\caption{Design Sequence Diagram for UC2 -- Login User}
+\label{fig:sd-uc2}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC3 -- Logout User}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC3.png}
+\caption{Design Sequence Diagram for UC3 -- Logout User}
+\label{fig:sd-uc3}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC5 -- Edit Category}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC5.png}
+\caption{Design Sequence Diagram for UC5 -- Edit Category}
+\label{fig:sd-uc5}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC7 -- Select Active Category}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC7.png}
+\caption{Design Sequence Diagram for UC7 -- Select Active Category}
+\label{fig:sd-uc7}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC8 -- Create List}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC8.png}
+\caption{Design Sequence Diagram for UC8 -- Create List}
+\label{fig:sd-uc8}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC10 -- Delete List}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.65\textwidth,
+  height=0.55\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC10.png}
+\caption{Design Sequence Diagram for UC10 -- Delete List}
+\label{fig:sd-uc10}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC12 -- Create Reminder}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC12.png}
+\caption{Design Sequence Diagram for UC12 -- Create Reminder}
+\label{fig:sd-uc12}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC13 -- Edit Reminder}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC13.png}
+\caption{Design Sequence Diagram for UC13 -- Edit Reminder}
+\label{fig:sd-uc13}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC14 -- Delete Reminder}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC14.png}
+\caption{Design Sequence Diagram for UC14 -- Delete Reminder}
+\label{fig:sd-uc14}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC15 -- Mark Reminder as Completed}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC15.png}
+\caption{Design Sequence Diagram for UC15 -- Mark Reminder as Completed}
+\label{fig:sd-uc15}
+\end{figure}
+
+\clearpage
+
+\paragraph{UC17 -- View Completed Reminders}
+\begin{figure}
+\centering
+\includegraphics[
+  width=0.85\textwidth,
+  height=0.75\textheight,
+  keepaspectratio
+]{images/diagrams/SD_UC17.png}
+\caption{Design Sequence Diagram for UC17 -- View Completed Reminders}
+\label{fig:sd-uc17}
+\end{figure}
+
+\clearpage
+
+\subsection{User Interface}
+
+\begin{figure}
+\centering
+\includegraphics[
+  width=1\textwidth,
+  height=1\textheight,
+  keepaspectratio
+]{images/diagrams/UI.png}
+\caption{User Interface Overview of the PingMe2 Mobile Application}
+\label{fig:user-interface}
+\end{figure}
+\clearpage
+
+\section{Implementation}
+\subsection{Introduction}
+
+This section presents representative excerpts of the application implementation, selected exclusively for documentation and technical explanation purposes. The presented excerpts correspond directly to the real implementation of the application and illustrate both core functionalities and secondary mechanisms that employ different and technically relevant interaction patterns.
+
+\subsection{Active Category Management}
+
+\begin{lstlisting}[caption={Redux Action Constant}]
+export const SET_CATEGORIA_ATIVA = 'SET_CATEGORIA_ATIVA';
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Persisting Active Category Selection}]
+export const setCategoriaAtiva = (id: string) => async (dispatch: Dispatch) => {
+  await AsyncStorage.setItem(STORAGE_KEY, id);
+  dispatch({ type: SET_CATEGORIA_ATIVA, payload: id });
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Loading Persisted Active Category}]
+export const loadCategoriaAtiva = () => async (dispatch: Dispatch) => {
+  const stored = await AsyncStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    dispatch({ type: SET_CATEGORIA_ATIVA, payload: stored });
+  }
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Category Reducer Initial State}]
+const initialState: CategoriaState = {
+  items: [TODOS_CATEGORIA],
+  categoriaAtivaId: ID_TODOS,
+  loading: false,
+  error: null,
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Handling Active Category Update in Reducer}]
+case SET_CATEGORIA_ATIVA:
+  return {
+    ...state,
+    categoriaAtivaId: action.payload,
+  };
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Selecting Active Category from Global State}]
+const categoriaAtivaId = useSelector(
+  (state: RootState) => state.categorias.categoriaAtivaId
+);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Filtering Reminders by Active Category}]
+const lembretesFiltrados = useMemo(() => {
+  if (!categoriaAtivaId || String(categoriaAtivaId) === ID_TODOS) {
+    return lembretes;
+  }
+  return lembretes.filter(
+    (l: any) => String(l.categoria_id) === String(categoriaAtivaId)
+  );
+}, [lembretes, categoriaAtivaId]);
+\end{lstlisting}
+
+\subsection{Data Creation and Persistence – Reminders}
+
+\begin{lstlisting}[caption={Reminder Creation Action Types}]
+export const CREATE_LEMBRETE_REQUEST = 'CREATE_LEMBRETE_REQUEST';
+export const CREATE_LEMBRETE_SUCCESS = 'CREATE_LEMBRETE_SUCCESS';
+export const CREATE_LEMBRETE_FAILURE = 'CREATE_LEMBRETE_FAILURE';
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Asynchronous Reminder Creation Action}]
+export const createLembrete = (data: any) => async (dispatch: Dispatch) => {
+  dispatch({ type: CREATE_LEMBRETE_REQUEST });
+
+  const response = await fetch(`${API_URL}/lembretes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  const lembrete = await response.json();
+  dispatch({ type: CREATE_LEMBRETE_SUCCESS, payload: lembrete });
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Reminder Reducer Initial State}]
+const initialState: LembreteState = {
+  items: [],
+  loading: false,
+  error: null,
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Handling Reminder Creation in Reducer}]
+case CREATE_LEMBRETE_REQUEST:
+  return {
+    ...state,
+    loading: true,
+  };
+
+case CREATE_LEMBRETE_SUCCESS:
+  return {
+    ...state,
+    items: [...state.items, action.payload],
+    loading: false,
+  };
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Dispatching Reminder Creation from UI}]
+dispatch(createLembrete({
+  title,
+  description,
+  categoria_id,
+  lista_id,
+}));
+\end{lstlisting}
+
+\subsection{Navigation Between Screens}
+
+\begin{lstlisting}[caption={Stack Navigator Configuration}]
+const Stack = createNativeStackNavigator();
+
+<Stack.Navigator initialRouteName="InitialScreen">
+  <Stack.Screen name="InitialScreen" component={InitialScreen} />
+  <Stack.Screen name="HomeScreen" component={HomeScreen} />
+  <Stack.Screen name="CreateLembreteScreen" component={CreateLembreteScreen} />
+</Stack.Navigator>
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Navigation Trigger from UI Interaction}]
+const navigation = useNavigation();
+
+const handleCreateReminder = () => {
+  navigation.navigate('CreateLembreteScreen');
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Navigation Button Component}]
+<Button
+  title="Create Reminder"
+  onPress={handleCreateReminder}
+/>
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Returning to Previous Screen After Success}]
+const handleSuccess = () => {
+  navigation.goBack();
+};
+\end{lstlisting}
+
+\subsection{Long Press Interaction on Lists}
+
+\begin{lstlisting}[caption={UI State for Delete Mode Control}]
+const [deleteMode, setDeleteMode] = useState(false);
+const [selectedListId, setSelectedListId] = useState<string | null>(null);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Short Press vs Long Press Gesture Handling}]
+<TouchableOpacity
+  onPress={() => {
+    if (deleteMode) {
+      setSelectedListId(lista.id);
+    } else {
+      navigation.navigate('ListDetailsScreen', { listId: lista.id });
+    }
+  }}
+  onLongPress={() => {
+    setDeleteMode(true);
+    setSelectedListId(lista.id);
+  }}
+>
+  <Text>{lista.nome}</Text>
+</TouchableOpacity>
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Deletion Confirmation and State Reset}]
+const handleConfirmDelete = () => {
+  if (selectedListId) {
+    dispatch(deleteLista(selectedListId));
+    setDeleteMode(false);
+    setSelectedListId(null);
+  }
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Deletion Confirmation Modal}]
+<ConfirmationModal
+  visible={deleteMode}
+  onConfirm={handleConfirmDelete}
+  onCancel={() => setDeleteMode(false)}
+/>
+\end{lstlisting}
+
+\section{Tests}
+\section{Conclusion}
+
+The objectives defined at the beginning of the PingMe2 project were successfully achieved. The developed application implements all the planned functionalities, providing users with an effective solution for managing reminders, categories, and lists through an intuitive and structured mobile interface.
+
+Throughout the development process, no major technical obstacles were encountered that compromised the implementation. This allowed the project to progress in a clear and well-organized manner. The use of React Native contributed to a modular and maintainable codebase, while Redux ensured consistent and centralized state management across the application.
+
+Furthermore, the interaction with a RESTful API enabled the practical application of a complete set of CRUD operations, extending beyond simple data retrieval to include the creation, update, and deletion of resources. This reinforced the importance of a clear separation between frontend and backend responsibilities within a client--server architecture.
+
+Overall, the PingMe2 project provided valuable practical experience in modern mobile application development, consolidating both theoretical concepts and technical skills acquired throughout the course.
+
+\end{document}

@@ -8,8 +8,6 @@ FR-02. The system shall allow users to log in using valid credentials.
 
 FR-03. The system shall allow users to log out, clearing all session-related data.
 
-FR-04. The system shall maintain the authenticated state across app restarts.
-
 ---
 
 ## 2. User Profile Management

@@ -38,7 +38,7 @@ else Delete via list edit screen
   user -> HomeUI: Opens list
   HomeUI -> EditUI: Navigates to EditListScreen
 
-  user -> EditUI: Selects "Delete Button"
+  user -> EditUI: Selects "Delete" button
   EditUI --> user: Requests deletion confirmation
   user -> EditUI: Confirms deletion
 
@@ -55,4 +55,8 @@ else Delete via list edit screen
     Reducer --> EditUI: updated state
     EditUI --> user: Shows success message\n(List deleted)
   else Deletion cancelled
-    EditUI --> user: Ope
+    EditUI --> user: Operation cancelled
+  end
+end
+
+@enduml
