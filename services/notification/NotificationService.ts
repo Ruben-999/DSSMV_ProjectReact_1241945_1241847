@@ -59,34 +59,89 @@ export const NotificationService = {
     const triggerDate = new Date(dataAlvo.getTime() - antecedenciaMs);
 
     // Se a data já passou, não agendar
-    if (triggerDate.getTime() < Date.now()) return;
+    if (!lembrete.repeticao && triggerDate.getTime() < Date.now()) return;
 
-    console.log(`Agendando notificação para: ${triggerDate.toLocaleString()}`);
+    console.log(`Agendando notificação para (${lembrete.repeticao || 'único'}): ${triggerDate.toLocaleString()}`);
 
-    const now = Date.now();
-    const triggerTimestamp = triggerDate.getTime();
-    let secondsUntilTrigger = Math.floor((triggerTimestamp - now) / 1000);
+    const content = {
+      title: "⏰ " + lembrete.titulo,
+      body: lembrete.descricao || `Tens um lembrete agora!`,
+      data: { lembreteId: lembrete.id },
+      sound: true,
+    };
 
-    if (secondsUntilTrigger <= 0) secondsUntilTrigger = 1; // Garante que é futuro
+try {
+      let trigger: any;
 
-    try {
-    //Agendar no OS
+      // Lógica de Repetição (Usamos CALENDAR - por causa do controlo por dias/meses etc...)
+      switch (lembrete.repeticao) {
+        case 'diario':
+          trigger = {
+            type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+            hour: triggerDate.getHours(),
+            minute: triggerDate.getMinutes(),
+            repeats: true, 
+          };
+          break;
+
+        case 'semanal':
+          // No Expo/JS o Domingo é 1, Segunda é 2, etc. (1-7)
+          // O getDay() (Dia da Semana) do TS devolve 0 (Domingo) a 6 (Sábado).
+          trigger = {
+            type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+            weekday: triggerDate.getDay() + 1, // JS (0-6) -> Expo Calendar (1-7)
+            hour: triggerDate.getHours(),
+            minute: triggerDate.getMinutes(),
+            repeats: true,
+          };
+          break;
+
+        case 'mensal':
+
+          trigger = {
+            type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+            day: triggerDate.getDate(), // getDate() = Dia do Mes (1 - 31)
+            hour: triggerDate.getHours(),
+            minute: triggerDate.getMinutes(),
+            repeats: true,
+          };
+          break;
+
+        case 'anual':
+
+          trigger = {
+            type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+            month: triggerDate.getMonth() + 1, // JS (0-11) --> Calendar (1-12)
+            weekday: triggerDate.getDate(),
+            hour: triggerDate.getHours(),
+            minute: triggerDate.getMinutes(),
+            repeats: true,
+          }
+          break;
+        
+        default:
+          // Sem repetição - Trigger Único
+          // Neste caso é melhor usar o TIME_INTERVAL
+          const now = Date.now();
+          const currentDateTime = triggerDate.getTime();
+          let secondsUntilTrigger = Math.floor((currentDateTime - now) / 1000);
+
+          if (secondsUntilTrigger <= 0) secondsUntilTrigger = 1; // Garante que é no futuro
+
+          trigger = {
+            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+            seconds: secondsUntilTrigger,
+            repeats: false,
+          };
+          break;
+      }
+
       const id = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "⏰ " + lembrete.titulo,
-          body: lembrete.descricao || `Tens um lembrete para agora!`,
-          data: { lembreteId: lembrete.id },
-          sound: true, 
-        },
-        trigger: {
-          // Usamos TIME_INTERVAL (segundos) que é mais estável no SDK 52
-          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: secondsUntilTrigger,
-          repeats: false,
-        }
+        content,
+        trigger,
       });
 
-      return id; // Retorna o ID do agendamento 
+      return id;
     } catch (error) {
       console.error("Erro ao agendar notificação:", error);
     }
