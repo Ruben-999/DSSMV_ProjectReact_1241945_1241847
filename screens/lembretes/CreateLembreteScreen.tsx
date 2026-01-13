@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/reducers';
 import { useDispatch } from 'react-redux';
@@ -13,9 +14,11 @@ import { addLembrete } from '../../redux/actions/lembreteActions';
 import { Lembrete, LembreteInput, Prioridade } from '../../redux/types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 
 const CreateLembreteScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   
   // --- ESTADOS ---
   const [titulo, setTitulo] = useState('');
@@ -40,6 +43,9 @@ const CreateLembreteScreen = () => {
 
   // Localização e Imagem
   const [localizacao, setLocalizacao] = useState<string | null>(null);
+  const [pickedLocation, setPickedLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [temLocalizacao, setTemLocalizacao] = useState(false); // Switch
+  const [enderecoLegivel, setEnderecoLegivel] = useState<string | null>(null);
   const [imagemUri, setImagemUri] = useState<string | null>(null);
 
   // UI Control
@@ -88,7 +94,6 @@ const CreateLembreteScreen = () => {
         setAntecedencia(0);
     }
   }, [temNotificacao]);
-
 
   // --- FUNÇÕES ---
 
@@ -144,29 +149,28 @@ const CreateLembreteScreen = () => {
     if (!result.canceled) setImagemUri(result.assets[0].uri);
   };
 
-  const handleLocation = () => {
-      Alert.alert("Localização", "Funcionalidade de mapas será implementada em breve.", [
-          { text: "Simular Local", onPress: () => setLocalizacao("41.1579, -8.6291") } 
-      ]);
-  };
-
   // --- SUBMETER ---
 
-  const handleCreate = async () => {
-    // 1. Tratamento da Localização (Converter String "lat, long" para numeros)
-    let lat = null;
-    let long = null;
-    
-    if (localizacao) {
-        const parts = localizacao.split(',');
-        if (parts.length === 2) {
-            lat = parseFloat(parts[0].trim());
-            long = parseFloat(parts[1].trim());
-        }
-    }
+    const handleCreate = async () => {
 
-    // 2. Montar objeto compatível com a interface 'Lembrete'
-    const novoLembrete = {
+        let lat = null;
+        let long = null;
+    
+        // Prioridade: Se escolheu no mapa (pickedLocation), usa isso.
+        // Se não, tenta fazer parse do texto manual (como tinhas antes).
+        if (temLocalizacao && pickedLocation) {
+            lat = pickedLocation.lat;
+            long = pickedLocation.lng;
+        } else if (localizacao) {
+            const parts = localizacao.split(',');
+            if (parts.length === 2) {
+                lat = parseFloat(parts[0].trim());
+                long = parseFloat(parts[1].trim());
+            }
+        }
+    
+        // Montar objeto compatível com a interface 'Lembrete'
+        const novoLembrete = {
         titulo,
         descricao: descricao || null, // Se vazio envia null
         
@@ -335,24 +339,80 @@ const CreateLembreteScreen = () => {
                     )}
                 </View>
 
-                {/* 2. LOCALIZAÇÃO */}
-                <View style={styles.optionBlock}>
-                    <View style={styles.optionHeaderRow}>
-                        <View style={styles.iconLabel}>
-                            <Ionicons name="location-outline" size={22} color="#fff" />
-                            <Text style={styles.optionLabel}>Localização</Text>
-                        </View>
-                        <TouchableOpacity onPress={handleLocation}>
-                             <Text style={styles.addPhotoText}>{localizacao ? "Alterar" : "Adicionar"}</Text>
-                        </TouchableOpacity>
-                    </View>
-                    {localizacao && (
-                         <View style={{marginTop: 10}}>
-                             <Text style={{color: '#888', fontSize: 12}}>📍 {localizacao}</Text>
-                         </View>
+               {/* 2. LOCALIZAÇÃO */}
+<View style={styles.optionBlock}>
+    <View style={styles.optionHeaderRow}>
+        <View style={styles.iconLabel}>
+            <Ionicons name="location-outline" size={22} color="#fff" />
+            <Text style={styles.optionLabel}>Localização</Text>
+        </View>
+        {/* Switch para ativar/desativar */}
+        <Switch 
+            value={temLocalizacao} 
+            onValueChange={(val) => {
+                setTemLocalizacao(val);
+                if (!val) setPickedLocation(null); // Se desligar, limpa os dados
+            }} 
+            trackColor={{false: '#333', true: '#6c2cff'}} 
+        />
+    </View>
+
+    {/* Só mostra o botão do mapa se o Switch estiver ON */}
+    {temLocalizacao && (
+        <TouchableOpacity 
+            style={{ 
+            flexDirection: 'row', alignItems: 'center', marginTop: 10, 
+            backgroundColor: '#2a2a2a', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#444'
+            }}
+onPress={() => {
+        (navigation as any).navigate('LocationPicker', {
+            onReturn: async (novaLocalizacao: {lat: number, lng: number}) => {
+                // Guarda as coordenadas (para a lógica)
+                setPickedLocation(novaLocalizacao);
+                setTemLocalizacao(true);
+
+                // Tenta descobrir o nome da rua 
+                try {
+                    const moradas = await Location.reverseGeocodeAsync({
+                        latitude: novaLocalizacao.lat,
+                        longitude: novaLocalizacao.lng
+                    });
+
+                    if (moradas.length > 0) {
+                        const m = moradas[0];
+                        // Cria uma string tipo: "Rua do ISEP, Porto"
+                        const texto = `${m.street || m.name || ''}, ${m.city || m.region || ''}`;
+                        setEnderecoLegivel(texto);
+                    }
+                } catch (e) {
+                    setEnderecoLegivel("Localização selecionada (Morada não disponível)");
+                }
+            }
+        });
+    }}
+    >
+            <Ionicons 
+            name={pickedLocation ? "map" : "map-outline"} 
+            size={20} 
+            color={pickedLocation ? "#6c2cff" : "#aaa"} 
+            style={{marginRight: 10}} 
+            />
+            <View>
+                <Text style={{color: '#fff', fontWeight: '500'}}>
+                    {pickedLocation ? 'Local Selecionado' : 'Selecionar no Mapa'}
+                </Text>
+                {pickedLocation && (
+                        <Text style={{color: '#888', fontSize: 11, marginTop: 2, maxWidth: 250}} numberOfLines={2}>
+                            {enderecoLegivel ? `📍 ${enderecoLegivel}` : `Lat: ${pickedLocation.lat.toFixed(4)}...`}
+                        </Text>
                     )}
                 </View>
-
+            <View style={{flex:1, alignItems: 'flex-end'}}>
+                <Ionicons name="chevron-forward" size={16} color="#717171ff"/>
+            </View>
+        </TouchableOpacity>
+    )}
+            </View>
                 {/* 3. PRIORIDADE */}
                 <View style={styles.optionBlock}>
                     <View style={styles.optionHeaderRow}>

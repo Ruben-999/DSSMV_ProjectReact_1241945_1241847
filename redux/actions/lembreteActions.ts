@@ -1,6 +1,7 @@
 import { Dispatch } from 'redux';
 import { apiLembretes } from '../../services/api';
 import { NotificationService } from '../../services/notification/NotificationService';
+import { LocationService } from '../../services/location/LocationService';
 import { 
   FETCH_LEMBRETES_REQUEST, FETCH_LEMBRETES_SUCCESS, FETCH_LEMBRETES_FAILURE,
   ADD_LEMBRETE_REQUEST, ADD_LEMBRETE_SUCCESS, ADD_LEMBRETE_FAILURE,
@@ -24,16 +25,30 @@ export const fetchLembretes = (userId: string) => {
   };
 };
 
-// 2. Add
 export const addLembrete = (lembrete: LembreteInput) => {
   return async (dispatch: Dispatch) => {
     dispatch({ type: ADD_LEMBRETE_REQUEST });
     try {
+      // Guarda na Base de Dados
       const { data, error } = await apiLembretes.createLembrete(lembrete);
+      
       if (error) throw new Error(error);
-      if(data){
-        await NotificationService.scheduleLembreteNotification(data) //agenda-se a notificação e depois dispatch
+
+      if (data) {
+        // Agendar Notificação 
+        await NotificationService.scheduleLembreteNotification(data);
+
+        // Se tiver Localização, Iniciar Geofencing 
+        if (data.local_latitude && data.local_longitude) {
+           await LocationService.startGeofencing(
+             data.id, 
+             data.local_latitude, 
+             data.local_longitude, 
+             data.raio_metros || 100
+           );
+        }
       }
+
       dispatch({ type: ADD_LEMBRETE_SUCCESS, payload: data });
     } catch (err: any) {
       dispatch({ type: ADD_LEMBRETE_FAILURE, payload: err.message });
