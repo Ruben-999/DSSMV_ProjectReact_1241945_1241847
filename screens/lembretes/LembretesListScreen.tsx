@@ -9,7 +9,7 @@ import LembreteItem from '../../components/LembreteItem';
 import { updateLembrete } from '../../redux/actions/lembreteActions';
 
 const LembretesListScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const dispatch = useDispatch();
   
@@ -30,7 +30,7 @@ const LembretesListScreen = () => {
         return l.concluido === true;
       
       case 'todos':
-        return l.concluido === false; // A tua regra: Todos = Todos os abertos
+        return l.concluido === false; 
       
       case 'hoje':
         return !l.concluido && dataLembrete === hojeString;
@@ -56,11 +56,6 @@ const LembretesListScreen = () => {
     dispatch(updateLembrete(id, { concluido: currentStatus }) as any);
   };
 
-  const handleEdit = (item: any) => {
-    // Por enquanto apenas um log, na próxima interação fazemos a tela de edição
-    console.log("Abrir edição para:", item.titulo);
-    // navigation.navigate('EditLembrete', { lembrete: item }); 
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,7 +76,7 @@ const LembretesListScreen = () => {
           <LembreteItem 
             item={item} 
             onToggleConcluido={handleToggle}
-            onPress={handleEdit}
+            onPress={(lembrete) => navigation.navigate('EditLembrete',{lembrete})}
           />
         )}
         ListEmptyComponent={

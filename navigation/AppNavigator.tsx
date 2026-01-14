@@ -28,6 +28,7 @@ import CreateListaScreen from '../screens/List/CreateListaScreen';
 import EditListScreen from '../screens/List/EditListaScreen';
 import AddLembreteToLista from '../screens/List/AddLembreteToListaScreen';
 import AddLembreteToListaScreen from '../screens/List/AddLembreteToListaScreen';
+import EditLembreteScreen from '../screens/lembretes/EditLembreteScreen'
 import LocationPickerScreen from '../screens/lembretes/LocationPickerScreen';
 
 // ================= STACKS =================
@@ -57,7 +58,7 @@ const AppNavigatorStack = () => (
     <AppStack.Screen name="LembretesList" component={LembretesListScreen} />
     
     <AppStack.Screen name="LocationPicker" component={LocationPickerScreen} />
-
+    <AppStack.Screen name="EditLembrete" component={EditLembreteScreen} />
     {/* CATEGORIAS */}
     <AppStack.Screen name="CreateCategoria" component={CreateCategoriaScreen} />
     <AppStack.Screen name="EditCategoria" component={EditCategoriaScreen} />

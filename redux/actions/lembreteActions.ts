@@ -1,5 +1,5 @@
 import { Dispatch } from 'redux';
-import { apiLembretes } from '../../services/api';
+import { apiCategorias, apiLembretes } from '../../services/api';
 import { NotificationService } from '../../services/notification/NotificationService';
 import { LocationService } from '../../services/location/LocationService';
 import { 
@@ -56,30 +56,59 @@ export const addLembrete = (lembrete: LembreteInput) => {
   };
 };
 
-// 3. Update (ex: marcar como concluído)
-export const updateLembrete = (id: string, updates: Partial<Lembrete>) => {
+//Update (ex: marcar como concluído)
+export const updateLembrete = (id: string, updates: Partial<LembreteInput>) => {
   return async (dispatch: Dispatch) => {
     dispatch({ type: UPDATE_LEMBRETE_REQUEST });
     try {
+      // Atualizar na Base de Dados primeiro
       const { data, error } = await apiLembretes.updateLembrete(id, updates);
       if (error) throw new Error(error);
+
+      if (data) {
+        
+        // Notificações
+        await NotificationService.cancelNotificationByLembreteId(id); // Mata a velha
+        if (data.notificar) {
+           await NotificationService.scheduleLembreteNotification(data); // Cria a nova
+        }
+
+        // Geolocalização
+        await LocationService.stopGeofencing(id); // Mata a velha
+        if (data.local_latitude && data.local_longitude) {
+           await LocationService.startGeofencing(
+             data.id,
+             data.local_latitude,
+             data.local_longitude,
+             data.raio_metros || 100
+           );
+        }
+      }
+
       dispatch({ type: UPDATE_LEMBRETE_SUCCESS, payload: data });
     } catch (err: any) {
+      console.error("Erro Update:", err);
       dispatch({ type: UPDATE_LEMBRETE_FAILURE, payload: err.message });
     }
   };
 };
 
-// 4. Delete
+// Delete
 export const deleteLembrete = (id: string) => {
   return async (dispatch: Dispatch) => {
     dispatch({ type: DELETE_LEMBRETE_REQUEST });
     try {
+      // Limpar Notificações e Geofence
+      await NotificationService.cancelNotificationByLembreteId(id);
+      await LocationService.stopGeofencing(id);
+
+      // Apagar da Base de Dados
       const { error } = await apiLembretes.deleteLembrete(id);
       if (error) throw new Error(error);
-      // No delete, o payload é o ID para removermos da lista localmente
+
       dispatch({ type: DELETE_LEMBRETE_SUCCESS, payload: id });
     } catch (err: any) {
+      console.error("Erro Delete:", err);
       dispatch({ type: DELETE_LEMBRETE_FAILURE, payload: err.message });
     }
   };

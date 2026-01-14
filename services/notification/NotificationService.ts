@@ -147,10 +147,22 @@ try {
     }
   },
 
-  // --- C. CANCELAR NOTIFICAÇÃO (Para quando se apaga ou conclui um lembrete) ---
-  // Nota: Para isto funcionar bem, precisarias de guardar o 'notification_id' na BD.
-  // Como simplificação, podemos cancelar TUDO e reagendar, ou ignorar por agora.
-  async cancelAllNotifications() {
-    await Notifications.cancelAllScheduledNotificationsAsync();
+  
+  async cancelNotificationByLembreteId(lembreteId: string) {
+    try {
+      // Obtém todas as notificações agendadas
+      const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+      
+      // Procura a que tem o ID 
+      const target = scheduled.find(n => n.content.data?.lembreteId === lembreteId);
+
+      //Se encontrar, cancela
+      if (target) {
+        await Notifications.cancelScheduledNotificationAsync(target.identifier);
+        console.log(`Notificação cancelada para lembrete: ${lembreteId}`);
+      }
+    } catch (error) {
+      console.error("Erro ao cancelar notificação:", error);
+    }
   }
 };

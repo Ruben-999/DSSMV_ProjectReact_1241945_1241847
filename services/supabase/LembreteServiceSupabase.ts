@@ -54,13 +54,13 @@ export const LembreteServiceSupabase: ILembreteService = {
 
       let finalImagePath = null;
 
-      // 1. Upload da Imagem
-      // Nota: O ecrã enviou 'foto_url' com o caminho local (file://...)
+      // Upload da Imagem
+      // O ecrã enviou 'foto_url' com o caminho local (file://...)
       if (lembreteData.foto_url && lembreteData.foto_url.startsWith('file://')) {
         finalImagePath = await uploadImage(lembreteData.foto_url, user.id);
       }
 
-      // 2. Preparar objeto final
+      // Preparar objeto final
       const objectToSave = {
         ...lembreteData,
         user_id: user.id,
@@ -69,7 +69,7 @@ export const LembreteServiceSupabase: ILembreteService = {
         created_at: new Date().toISOString(), // Opcional, o Supabase gera isto, mas o TS pode pedir
       };
 
-      // 3. Insert
+      // Insert
       const { data, error } = await supabase
         .from('lembretes')
         .insert(objectToSave)

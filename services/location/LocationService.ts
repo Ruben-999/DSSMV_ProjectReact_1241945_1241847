@@ -7,9 +7,10 @@ import { NotificationService } from '../notification/NotificationService';
 export const GEOFENCING_TASK_NAME = 'GEOFENCING_TASK';
 
 //DEFINIR A TAREFA 
+try {
 TaskManager.defineTask(GEOFENCING_TASK_NAME, async ({ data, error }: any) => {
   if (error) {
-    console.error("Erro na tarefa de Geofencing:", error);
+    console.error("Erro na tarefa de Geofencing:", error.message);
     return;
   }
   
@@ -28,30 +29,40 @@ TaskManager.defineTask(GEOFENCING_TASK_NAME, async ({ data, error }: any) => {
     } as any);
   }
 });
+} catch (e) {
+  console.log("Aviso: Não foi possível definir a Task (Provavelmente limitações do Expo Go).");
+}
 
 export const LocationService = {
+  
   async requestPermissions() {
-    // Permissão Foreground (Enquanto usa a app)
-    const { status: foreStatus } = await Location.requestForegroundPermissionsAsync();
-    if (foreStatus !== 'granted') {
-      Alert.alert('Permissão negada', 'Precisamos de acesso à localização para os lembretes.');
-      return false;
-    }
+    try {
+        const { status: foreStatus } = await Location.requestForegroundPermissionsAsync();
+        if (foreStatus !== 'granted') {
+            return false;
+        }
 
-    // Permissão Background 
-    const { status: backStatus } = await Location.requestBackgroundPermissionsAsync();
-    if (backStatus !== 'granted') {
-      Alert.alert(
-        'Atenção', 
-        'Para os lembretes de local funcionarem com a app fechada, tens de selecionar "Permitir Sempre" nas definições.'
-      );
-      return false;
+        const { status: backStatus } = await Location.requestBackgroundPermissionsAsync();
+        if (backStatus !== 'granted') {
+            console.log("Permissão de background negada. Geofencing não funcionará app fechada.");
+            return true; 
+        }
+        return true;
+    } catch (e) {
+        console.log("Erro ao pedir permissões:", e);
+        return false;
     }
-    return true;
   },
 
   // INICIAR MONITORIZAÇÃO (Chamar ao criar lembrete) 
   async startGeofencing(lembreteId: string, latitude: number, longitude: number, radius: number = 100) {
+    // Verificar se o TaskManager está disponível 
+    const isTaskDefined = await TaskManager.isTaskDefined(GEOFENCING_TASK_NAME);
+    if (!isTaskDefined) {
+        console.log("Task de Geofencing não definida. Ignorando start.");
+        return;
+    }
+    
     const hasPermission = await this.requestPermissions();
     if (!hasPermission) return;
 
@@ -66,16 +77,23 @@ export const LocationService = {
           notifyOnExit: false,
         },
       ]);
-      console.log(`✅ Geofence criada para: ${lembreteId}`);
-    } catch (error) {
-      console.error("Erro ao criar Geofence:", error);
+      console.log(`Geofence criada para: ${lembreteId}`);
+    } catch (error: any) {
+      // Se o erro for sobre "Task not found" ou limitações do Expo Go, apenas avisamos na consola
+      if (error.message && error.message.includes('Task')) {
+          console.log(`Aviso Expo Go: Não foi possível iniciar Geofence real (Limitação do simulador/app): ${error.message}`);
+      } else {
+          console.error("Erro genérico ao criar Geofence:", error);
+      }
     }
   },
 
 // PARAR MONITORIZAÇÃO 
   async stopGeofencing(lembreteId: string) {
     try {
-      
+      const isTaskDefined = await TaskManager.isTaskDefined(GEOFENCING_TASK_NAME);
+      if (!isTaskDefined) return;
+
       await Location.stopGeofencingAsync(GEOFENCING_TASK_NAME);
       console.log(`Geofence parada (Tarefa: ${GEOFENCING_TASK_NAME})`);
     } catch (error) {
