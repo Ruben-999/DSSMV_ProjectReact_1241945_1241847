@@ -243,7 +243,14 @@ const HomeScreen: React.FC = () => {
                   styles.iconBtnRed,
                   deleteMode && styles.iconBtnActive,
                 ]}
-                onPress={() => (deleteMode ? exitModes() : setDeleteMode(true))}
+                onPress={() => {
+                  if (deleteMode) {
+                    exitModes();
+                  } else {
+                    setEditMode(false);
+                    setDeleteMode(true);
+                  }
+                }}
               >
                 <Ionicons name="remove" size={18} color="#000" />
               </TouchableOpacity>
@@ -255,7 +262,14 @@ const HomeScreen: React.FC = () => {
                   styles.iconBtnYellow,
                   editMode && styles.iconBtnActive,
                 ]}
-                onPress={() => (editMode ? exitModes() : setEditMode(true))}
+                onPress={() => {
+                  if (editMode) {
+                    exitModes();
+                  } else {
+                    setDeleteMode(false);
+                    setEditMode(true);
+                  }
+                }}
               >
                 <Ionicons name="pencil" size={16} color="#000" />
               </TouchableOpacity>

@@ -78,7 +78,7 @@ const LembreteScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate('EditLembrete', { lembreteId: lembrete.id })
+            navigation.navigate('EditLembrete', { lembrete })
           }
         >
           <Ionicons name="pencil" size={22} color="#facc15" />

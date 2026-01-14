@@ -146,6 +146,7 @@ const EditCategoriaScreen: React.FC = () => {
     for (const l of lembretesParaAdicionar) {
       await dispatch(
         updateLembrete(l.id, {
+          ...l,
           categoria_id: Number(categoria.id),
         }) as any
       );
@@ -155,6 +156,7 @@ const EditCategoriaScreen: React.FC = () => {
     for (const l of lembretesParaRemover) {
       await dispatch(
         updateLembrete(l.id, {
+          ...l,
           categoria_id: null,
         }) as any
       );
