@@ -312,9 +312,9 @@ const getImageSource = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}><Text style={styles.cancelText}>Cancelar</Text></TouchableOpacity>
-        <Text style={styles.headerTitle}>Novo Lembrete</Text>
+        <Text style={styles.headerTitle}>Editar Lembrete</Text>
         <TouchableOpacity onPress={handleSave} disabled={!titulo}>
-          <Text style={[styles.createText, !titulo && styles.disabledText]}>Criar</Text>
+          <Text style={[styles.createText, !titulo && styles.disabledText]}>Atualizar</Text>
         </TouchableOpacity>
       </View>
 

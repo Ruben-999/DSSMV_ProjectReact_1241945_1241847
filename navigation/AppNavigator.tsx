@@ -61,7 +61,7 @@ const AppNavigatorStack = () => (
     <AppStack.Screen name="EditLembrete" component={EditLembreteScreen} />
     
     <AppStack.Screen name="LocationPicker" component={LocationPickerScreen} />
-    <AppStack.Screen name="EditLembrete" component={EditLembreteScreen} />
+
     {/* CATEGORIAS */}
     <AppStack.Screen name="CreateCategoria" component={CreateCategoriaScreen} />
     <AppStack.Screen name="EditCategoria" component={EditCategoriaScreen} />

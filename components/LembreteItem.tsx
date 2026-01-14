@@ -22,7 +22,7 @@ const LembreteItem: React.FC<Props> = ({ item, onToggleConcluido, onPress }) => 
 
   const getPrioridadeLabel = () => {
     if (item.prioridade === 3) return 'Alta';
-    if (item.prioridade === 2) return 'Média';
+    if (item.prioridade === 2) return 'MÃ©dia';
     return 'Baixa';
   };
 
