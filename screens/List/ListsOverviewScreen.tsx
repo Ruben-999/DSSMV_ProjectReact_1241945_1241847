@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { deleteLista } from '../../redux/actions/listaActions';
 
 const ID_TODOS = 'todos';
+const ID_SEM_LISTA = 'sem_lista';
 
 const ListsOverviewScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -39,10 +40,28 @@ const ListsOverviewScreen: React.FC = () => {
         );
   }, [lembretes, categoriaAtivaId]);
 
-  const getCount = (listaId: string) =>
-    lembretesFiltrados.filter(
+  const getCount = (listaId: string, isDefault: boolean) => {
+    if (isDefault) {
+      return lembretesFiltrados.filter(l => !l.lista_id).length;
+    }
+    return lembretesFiltrados.filter(
       l => String(l.lista_id) === String(listaId)
     ).length;
+  };
+
+  const listasComDefault = useMemo(() => {
+    const temDefault = listas.some(l => l.is_default);
+    if (temDefault) return listas;
+    return [
+      {
+        id: ID_SEM_LISTA,
+        nome: 'Sem Lista',
+        is_default: true,
+        cor_hex: '#1e1e1e',
+      },
+      ...listas,
+    ];
+  }, [listas]);
 
   const toggleSelect = (id: string, isDefault: boolean) => {
     if (isDefault) {
@@ -93,7 +112,7 @@ const ListsOverviewScreen: React.FC = () => {
   const renderItem = ({ item }: { item: any }) => {
     const id = String(item.id);
     const isSelected = selectedIds.has(id);
-    const count = getCount(id);
+    const count = getCount(id, item.is_default);
 
     return (
       <TouchableOpacity
@@ -116,7 +135,7 @@ const ListsOverviewScreen: React.FC = () => {
             toggleSelect(id, item.is_default);
           } else {
             navigation.navigate('ListDetails', {
-              listaId: item.id,
+              listaId: item.is_default ? ID_SEM_LISTA : item.id,
             });
           }
         }}
@@ -171,7 +190,7 @@ const ListsOverviewScreen: React.FC = () => {
       )}
 
       <FlatList
-        data={listas}
+        data={listasComDefault}
         keyExtractor={i => String(i.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}

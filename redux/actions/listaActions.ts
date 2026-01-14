@@ -1,12 +1,14 @@
 import { Dispatch } from 'redux';
-import { apiListas } from '../../services/api';
+import { apiLembretes, apiListas } from '../../services/api';
 import { 
   FETCH_LISTAS_REQUEST, FETCH_LISTAS_SUCCESS, FETCH_LISTAS_FAILURE,
   ADD_LISTA_REQUEST, ADD_LISTA_SUCCESS, ADD_LISTA_FAILURE,
   DELETE_LISTA_REQUEST, DELETE_LISTA_SUCCESS, DELETE_LISTA_FAILURE,
   UPDATE_LISTA_REQUEST, UPDATE_LISTA_SUCCESS,UPDATE_LISTA_FAILURE,
+  UPDATE_LEMBRETE_REQUEST, UPDATE_LEMBRETE_SUCCESS, UPDATE_LEMBRETE_FAILURE,
   Lista
 } from '../types';
+import { RootState } from '../reducers';
 
 // Fetch Listas
 export const fetchListas = (userId: string) => {
@@ -45,11 +47,14 @@ export const addLista = (
         type: ADD_LISTA_SUCCESS,
         payload: data,
       });
+
+      return data;
     } catch (err: any) {
       dispatch({
         type: ADD_LISTA_FAILURE,
         payload: err.message ?? 'Erro ao criar lista',
       });
+      return null;
     }
   };
 };
@@ -70,12 +75,41 @@ export const updateLista = (id: string, updates: Partial<Lista>) => {
 
 // Delete Lista
 export const deleteLista = (id: string) => {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: Dispatch, getState: () => RootState) => {
     dispatch({ type: DELETE_LISTA_REQUEST });
     try {
+      const lembretesDaLista = getState().lembretes.items.filter(
+        lembrete => String(lembrete.lista_id) === String(id)
+      );
+
+      if (lembretesDaLista.length > 0) {
+        dispatch({ type: UPDATE_LEMBRETE_REQUEST });
+        try {
+          const updatedLembretes = await Promise.all(
+            lembretesDaLista.map(async lembrete => {
+              const { data, error } = await apiLembretes.updateLembrete(
+                String(lembrete.id),
+                { lista_id: null }
+              );
+              if (error || !data) {
+                throw new Error(error ?? 'Erro ao atualizar lembrete');
+              }
+              return data;
+            })
+          );
+
+          updatedLembretes.forEach(lembrete => {
+            dispatch({ type: UPDATE_LEMBRETE_SUCCESS, payload: lembrete });
+          });
+        } catch (err: any) {
+          dispatch({ type: UPDATE_LEMBRETE_FAILURE, payload: err.message });
+          throw err;
+        }
+      }
+
       const { error } = await apiListas.deleteLista(id);
       if (error) throw new Error(error);
-      dispatch({ type: DELETE_LISTA_SUCCESS, payload: id }); // Payload Ã© o ID para remover do estado
+      dispatch({ type: DELETE_LISTA_SUCCESS, payload: id }); // Payload é o ID para remover do estado
     } catch (err: any) {
       dispatch({ type: DELETE_LISTA_FAILURE, payload: err.message });
     }
