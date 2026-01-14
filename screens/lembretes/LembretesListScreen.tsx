@@ -86,7 +86,9 @@ const LembretesListScreen = () => {
           <LembreteItem 
             item={item} 
             onToggleConcluido={handleToggle}
-            onPress={(lembrete) => navigation.navigate('EditLembrete',{lembrete})}
+            onPress={(lembrete) =>
+              navigation.navigate('LembreteDetails', { lembreteId: lembrete.id })
+            }
           />
         )}
         ListEmptyComponent={

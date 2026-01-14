@@ -47,7 +47,7 @@ const LembreteScreen: React.FC = () => {
 
   const getPrioridadeLabel = (prioridade: number) => {
     if (prioridade === 3) return 'Alta';
-    if (prioridade === 2) return 'Média';
+    if (prioridade === 2) return 'Mï¿½dia';
     return 'Baixa';
   };
 
@@ -78,7 +78,7 @@ const LembreteScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate('EditLembrete', { lembreteId: lembrete.id })
+            navigation.navigate('EditLembrete', { lembrete })
           }
         >
           <Ionicons name="pencil" size={22} color="#facc15" />
