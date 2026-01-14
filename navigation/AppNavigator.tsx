@@ -30,7 +30,6 @@ import CreateListaScreen from '../screens/List/CreateListaScreen';
 import EditListScreen from '../screens/List/EditListaScreen';
 import AddLembreteToLista from '../screens/List/AddLembreteToListaScreen';
 import AddLembreteToListaScreen from '../screens/List/AddLembreteToListaScreen';
-import EditLembreteScreen from '../screens/lembretes/EditLembreteScreen'
 import LocationPickerScreen from '../screens/lembretes/LocationPickerScreen';
 
 // ================= STACKS =================
