@@ -1,8 +1,8 @@
 # Fdb version 4
-["pdflatex"] 1767745973.58252 "c:/Users/Utilizador/Documents/GitHub/DSSMV_ProjectReact_1241945_1241847/docs/Relatorio/DSSMV_ProjectReact_report_1241945_1241847.tex" "DSSMV_ProjectReact_report_1241945_1241847.pdf" "DSSMV_ProjectReact_report_1241945_1241847" 1767745975.12995 0
-  "DSSMV_ProjectReact_report_1241945_1241847.aux" 1767745974 16166 954ec01efd54f5780162eb1a63808142 "pdflatex"
-  "DSSMV_ProjectReact_report_1241945_1241847.tex" 1767745970 36623 09c79e76ba8dfe5a5ef6c034426aa37c ""
-  "c:/Users/Utilizador/Documents/GitHub/DSSMV_ProjectReact_1241945_1241847/docs/Relatorio/DSSMV_ProjectReact_report_1241945_1241847.tex" 1767745970 36623 09c79e76ba8dfe5a5ef6c034426aa37c ""
+["pdflatex"] 1768151683.95041 "c:/Users/Utilizador/Documents/GitHub/DSSMV_ProjectReact_1241945_1241847/docs/Relatorio/DSSMV_ProjectReact_report_1241945_1241847.tex" "DSSMV_ProjectReact_report_1241945_1241847.pdf" "DSSMV_ProjectReact_report_1241945_1241847" 1768151686.40725 0
+  "DSSMV_ProjectReact_report_1241945_1241847.aux" 1768151686 18176 c7f1cc7da780ff8450f379f39210f411 "pdflatex"
+  "DSSMV_ProjectReact_report_1241945_1241847.tex" 1768151680 38801 afb1bc94cb8f2b1db29d702b5033efad ""
+  "c:/Users/Utilizador/Documents/GitHub/DSSMV_ProjectReact_1241945_1241847/docs/Relatorio/DSSMV_ProjectReact_report_1241945_1241847.tex" 1768151680 38801 afb1bc94cb8f2b1db29d702b5033efad ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1767705655 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1767707101 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2025/texmf-dist/fonts/tfm/jknappen/ec/tctt0900.tfm" 1767706602 1536 bda3e6bf9784a4cc572c754e0c3eeb00 ""
@@ -65,6 +65,14 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1767712720 5587484 30eee748fa419a911c40b0c750dd21ba ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1767712988 3635700 f7dc4b2805e5cd264b76a4c6dd06c4be ""
   "c:/texlive/2025/texmf.cnf" 1767712688 713 e69b156964470283e0530f5060668171 ""
+  "images/Tests/Auth_Prints/Auth_tests_diagram.png" 1768144886 68367 12243363b8e73fdb0bd38ec510f9f0e1 ""
+  "images/Tests/CategoriasHomeScreen_Prints/CategoriasHomeScreen_Diagram.png" 1768149213 86272 ddf1e8d96866705e4485061f0865091d ""
+  "images/Tests/Lembretes_Prints/Lembrete5.png" 1768150808 91023 c9fc3ec23ef2ae1c1cb24c8a9dca948a ""
+  "images/Tests/Lembretes_Prints/Lembretes1.png" 1768150607 76973 896cfa526f57effd2ec55667de7c7e68 ""
+  "images/Tests/Lembretes_Prints/Lembretes2.png" 1768150698 72586 baffafd9328c7183a7f7170b800e66c9 ""
+  "images/Tests/Lembretes_Prints/Lembretes3.png" 1768150726 98933 b3c3dc477c61012d4ad321685d3a6a63 ""
+  "images/Tests/Lembretes_Prints/Lembretes4.png" 1768150772 72642 7903d03a111487924f38605f3a158b3b ""
+  "images/Tests/Listas_Prints/Listas_Diagram.png" 1768150839 61246 d635a162087d43b0db903f1273459fbd ""
   "images/diagrams/Code_Organization.png" 1767738139 20747 e65b2c21cba2018da6afad18ec4d14a5 ""
   "images/diagrams/DM-PingMe2___Domain_Model.png" 1767737978 85720 a3e48f5545390915ef5fa7d8bda1538a ""
   "images/diagrams/Logic_Architecture.png" 1767738147 27759 e2cf28e4d670ccb48f2743a5bfc90fda ""

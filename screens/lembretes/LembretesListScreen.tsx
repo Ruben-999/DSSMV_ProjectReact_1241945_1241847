@@ -14,9 +14,10 @@ const LembretesListScreen = () => {
   const dispatch = useDispatch();
   
   // Recebe o filtro enviado pelo HomeScreen (hoje, agendado, concluido, todos)
-  const { filterType, filterTitle } = route.params || {};
+  const { filterType, filterTitle, categoriaId } = route.params || {};
 
   const { items: lembretes } = useSelector((state: RootState) => state.lembretes);
+  const categoriaAtiva = categoriaId ? String(categoriaId) : 'todos';
 
   // --- LÓGICA DE FILTRAGEM (Igual à do Home) ---
   const filteredLembretes = lembretes.filter(l => {
@@ -24,6 +25,12 @@ const LembretesListScreen = () => {
     
     // Tratamento de datas
     const dataLembrete = l.data_hora ? l.data_hora.split('T')[0] : null;
+
+    const categoriaMatch =
+      categoriaAtiva === 'todos' ||
+      String(l.categoria_id) === String(categoriaAtiva);
+
+    if (!categoriaMatch) return false;
 
     switch (filterType) {
       case 'concluido':
@@ -43,19 +50,22 @@ const LembretesListScreen = () => {
     }
   });
 
-  // Ordenar: Prioridade mais alta primeiro, depois data mais próxima
+  // Ordenar: Prioridade mais alta primeiro, depois data mais recente
   const sortedLembretes = filteredLembretes.sort((a, b) => {
-      if (b.prioridade !== a.prioridade) return b.prioridade - a.prioridade;
-      // Se tiver data, ordena por data
-      if (a.data_hora && b.data_hora) return a.data_hora.localeCompare(b.data_hora);
-      return 0;
+    if (b.prioridade !== a.prioridade) return b.prioridade - a.prioridade;
+    if (a.data_hora && b.data_hora) {
+      return b.data_hora.localeCompare(a.data_hora);
+    }
+    if (a.created_at && b.created_at) {
+      return b.created_at.localeCompare(a.created_at);
+    }
+    return 0;
   });
 
   // Ações
   const handleToggle = (id: string, currentStatus: boolean) => {
     dispatch(updateLembrete(id, { concluido: currentStatus }) as any);
   };
-
 
   return (
     <SafeAreaView style={styles.container}>

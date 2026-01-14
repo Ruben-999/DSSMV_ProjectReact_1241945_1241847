@@ -18,6 +18,8 @@ import RegisterScreen from '../screens/auth/RegisterScreen';
 import HomeScreen from '../screens/app/HomeScreen';
 import CreateLembreteScreen from '../screens/lembretes/CreateLembreteScreen';
 import LembretesListScreen from '../screens/lembretes/LembretesListScreen';
+import LembreteScreen from '../screens/lembretes/LembreteScreen';
+import EditLembreteScreen from '../screens/lembretes/EditLembreteScreen';
 
 import CreateCategoriaScreen from '../screens/Categorias/CreateCategoriaScreen';
 import EditCategoriaScreen from '../screens/Categorias/EditCategoriaScreen';
@@ -56,6 +58,8 @@ const AppNavigatorStack = () => (
     {/* LEMBRETES */}
     <AppStack.Screen name="CreateLembrete" component={CreateLembreteScreen} />
     <AppStack.Screen name="LembretesList" component={LembretesListScreen} />
+    <AppStack.Screen name="LembreteDetails" component={LembreteScreen} />
+    <AppStack.Screen name="EditLembrete" component={EditLembreteScreen} />
     
     <AppStack.Screen name="LocationPicker" component={LocationPickerScreen} />
     <AppStack.Screen name="EditLembrete" component={EditLembreteScreen} />

@@ -16,7 +16,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 
-const CreateLembreteScreen = () => {
+const EditLembreteScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   
@@ -572,7 +572,7 @@ onPress={() => {
   );
 };
 
-export default CreateLembreteScreen;
+export default EditLembreteScreen;
 
 // MANTÉM OS ESTILOS IGUAIS AO ANTERIOR
 const styles = StyleSheet.create({

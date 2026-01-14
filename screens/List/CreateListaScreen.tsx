@@ -64,16 +64,16 @@ const CreateListScreen: React.FC = () => {
 
   const handleCreate = async () => {
     if (!nome.trim()) {
-      Alert.alert('Nome obrigatório', 'A lista tem de ter um nome.');
+      Alert.alert('Nome obrigatorio', 'A lista tem de ter um nome.');
       return;
     }
 
     if (!userId) {
-      Alert.alert('Erro', 'Utilizador não autenticado.');
+      Alert.alert('Erro', 'Utilizador nao autenticado.');
       return;
     }
 
-    const action = await dispatch(
+    const created = await dispatch(
       addLista({
         user_id: userId,
         nome: nome.trim(),
@@ -82,10 +82,14 @@ const CreateListScreen: React.FC = () => {
       })
     );
 
-    const listaCriadaId =
-      (action as any)?.payload?.id;
+    const listaCriadaId = (created as any)?.id;
 
-    if (listaCriadaId && selectedLembretes.length > 0) {
+    if (!listaCriadaId) {
+      Alert.alert('Erro', 'Nao foi possivel criar a lista.');
+      return;
+    }
+
+    if (selectedLembretes.length > 0) {
       for (const id of selectedLembretes) {
         const lembrete = lembretes.find(l => l.id === id);
         if (!lembrete) continue;

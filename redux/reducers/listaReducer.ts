@@ -49,7 +49,9 @@ export const listaReducer = (state = initialState, action: any): ListaState => {
       return {
         ...state,
         loading: false,
-        items: state.items.filter(item => item.id !== action.payload)
+        items: state.items.filter(
+          item => String(item.id) !== String(action.payload)
+        )
       };
 
     // --- FAILURE ---

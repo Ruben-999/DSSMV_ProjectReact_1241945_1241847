@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -18,11 +19,17 @@ type RouteParams = {
 };
 
 const ID_TODOS = 'todos';
+const ID_SEM_LISTA = 'sem_lista';
+
+// Dados do SupaBase Storage
+const SUPABASE_PROJECT_ID = 'qrcsmtgswmlpcyivsquu';
+const BUCKET_NAME = 'lembretes-fotos';
 
 const ListDetailsScreen: React.FC = () => {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { listaId } = route.params as RouteParams;
+  const isSemLista = String(listaId) === ID_SEM_LISTA;
 
   const lista = useSelector((s: RootState) =>
     s.listas.items.find(l => String(l.id) === String(listaId))
@@ -34,15 +41,57 @@ const ListDetailsScreen: React.FC = () => {
     (s: RootState) => (s.categorias as any).categoriaAtivaId
   );
 
+  const getPrioridadeColor = (prioridade: number) => {
+    if (prioridade === 3) return '#ff6b6b';
+    if (prioridade === 2) return '#fde047';
+    return '#22c55e';
+  };
+
+  const getPrioridadeLabel = (prioridade: number) => {
+    if (prioridade === 3) return 'Alta';
+    if (prioridade === 2) return 'Média';
+    return 'Baixa';
+  };
+
+  const getImageUrl = (path?: string | null) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${BUCKET_NAME}/${path}`;
+  };
+
   const lembretesFiltrados = useMemo(() => {
-    return lembretes.filter(l => {
-      if (String(l.lista_id) !== String(listaId)) return false;
+    const filtrados = lembretes.filter(l => {
+      if (isSemLista) {
+        if (l.lista_id) return false;
+      } else if (String(l.lista_id) !== String(listaId)) {
+        return false;
+      }
       if (categoriaAtivaId === ID_TODOS) return true;
       return String(l.categoria_id) === String(categoriaAtivaId);
     });
-  }, [lembretes, listaId, categoriaAtivaId]);
+    return filtrados.sort((a, b) => {
+      if (b.prioridade !== a.prioridade) return b.prioridade - a.prioridade;
+      if (a.data_hora && b.data_hora) {
+        return b.data_hora.localeCompare(a.data_hora);
+      }
+      if (a.created_at && b.created_at) {
+        return b.created_at.localeCompare(a.created_at);
+      }
+      return 0;
+    });
+  }, [lembretes, listaId, categoriaAtivaId, isSemLista]);
 
-  if (!lista) {
+  const listaAtual = isSemLista
+    ? {
+        id: ID_SEM_LISTA,
+        nome: 'Sem Lista',
+        descricao: 'Lembretes sem lista',
+        cor_hex: '#121212',
+        is_default: true,
+      }
+    : lista;
+
+  if (!listaAtual) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: '#121212' }]}>
         <View style={styles.emptyWrap}>
@@ -52,7 +101,7 @@ const ListDetailsScreen: React.FC = () => {
     );
   }
 
-  const backgroundColor = lista.cor_hex ?? '#121212';
+  const backgroundColor = listaAtual.cor_hex ?? '#121212';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
@@ -61,24 +110,23 @@ const ListDetailsScreen: React.FC = () => {
           <Text style={styles.back}>Voltar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('EditList', { listaId })}
-        >
-          <Ionicons name="pencil" size={20} color="#facc15" />
-        </TouchableOpacity>
+        {!isSemLista && (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('EditList', { listaId })}
+          >
+            <Ionicons name="pencil" size={20} color="#facc15" />
+          </TouchableOpacity>
+        )}
       </View>
 
-      <Text style={styles.title}>{lista.nome}</Text>
-      {lista.descricao ? (
-        <Text style={styles.subtitle}>{lista.descricao}</Text>
+      <Text style={styles.title}>{listaAtual.nome}</Text>
+      {listaAtual.descricao ? (
+        <Text style={styles.subtitle}>{listaAtual.descricao}</Text>
       ) : null}
 
       {lembretesFiltrados.length === 0 ? (
         <View style={styles.emptyWrap}>
           <Text style={styles.emptyTitle}>Sem lembretes nesta lista</Text>
-          <Text style={styles.emptyText}>
-            NÃ£o existem lembretes para esta categoria.
-          </Text>
         </View>
       ) : (
         <FlatList
@@ -86,25 +134,77 @@ const ListDetailsScreen: React.FC = () => {
           keyExtractor={i => String(i.id)}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          renderItem={({ item }) => (
-            <View style={styles.row}>
-              <Text style={styles.rowTitle}>{item.titulo}</Text>
+          renderItem={({ item }) => {
+            const imageUrl = getImageUrl(item.foto_url);
+            return (
+            <TouchableOpacity
+              style={styles.row}
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate('LembreteDetails', {
+                  lembreteId: item.id,
+                })
+              }
+            >
+              <Text
+                style={[
+                  styles.rowTitle,
+                  item.prioridade > 0 && {
+                    color: getPrioridadeColor(item.prioridade),
+                  },
+                ]}
+              >
+                {item.titulo}
+              </Text>
               {item.descricao ? (
                 <Text style={styles.rowDesc}>{item.descricao}</Text>
               ) : null}
-            </View>
-          )}
+              {imageUrl ? (
+                <View style={styles.rowImageWrapper}>
+                  <Image
+                    source={{ uri: imageUrl }}
+                    style={styles.rowImage}
+                  />
+                </View>
+              ) : null}
+              <View style={styles.rowMeta}>
+                {item.data_hora ? (
+                  <Text style={styles.rowMetaText}>
+                    Data: {new Date(item.data_hora).toLocaleDateString()}
+                  </Text>
+                ) : null}
+                {item.prioridade > 0 ? (
+                  <Text
+                    style={[
+                      styles.rowMetaText,
+                      { color: getPrioridadeColor(item.prioridade) },
+                    ]}
+                  >
+                    Prioridade: {getPrioridadeLabel(item.prioridade)}
+                  </Text>
+                ) : null}
+              
+                {item.local_latitude != null && item.local_longitude != null ? (
+                  <Text style={styles.rowMetaText}>
+                    Local: {item.local_latitude.toFixed(4)}, {item.local_longitude.toFixed(4)}
+                  </Text>
+                ) : null}
+</View>
+            </TouchableOpacity>
+          )}}
         />
       )}
 
-      <TouchableOpacity
-        style={[styles.fab, { backgroundColor: '#00000055' }]}
-        onPress={() =>
-          navigation.navigate('AddLembreteToLista', { listaId })
-        }
-      >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
+      {!isSemLista && (
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: '#00000055' }]}
+          onPress={() =>
+            navigation.navigate('AddLembreteToLista', { listaId })
+          }
+        >
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -160,6 +260,25 @@ const styles = StyleSheet.create({
   rowDesc: {
     color: '#aaa',
     marginTop: 4,
+  },
+  rowImageWrapper: {
+    marginTop: 6,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#2a2a2a',
+  },
+  rowImage: {
+    width: '100%',
+    height: 140,
+    resizeMode: 'cover',
+  },
+  rowMeta: {
+    marginTop: 6,
+  },
+  rowMetaText: {
+    color: '#777',
+    fontSize: 12,
+    marginTop: 2,
   },
 
   separator: { height: 10 },

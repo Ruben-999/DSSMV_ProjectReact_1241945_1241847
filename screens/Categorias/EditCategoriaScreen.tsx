@@ -39,6 +39,7 @@ const EditCategoriaScreen: React.FC = () => {
   );
 
   const lembretes = useSelector((s: RootState) => s.lembretes.items);
+  const categorias = useSelector((s: RootState) => s.categorias.items);
   const userId = useSelector((s: RootState) => s.auth.user?.id);
 
   // --- STATE ---
@@ -61,6 +62,51 @@ const EditCategoriaScreen: React.FC = () => {
 
     setSelectedLembreteIds(ids);
   }, [categoria, lembretes]);
+
+  const getCategoriaNome = (categoriaId?: number | null) => {
+    if (!categoriaId) return null;
+    return (
+      categorias.find((c) => String(c.id) === String(categoriaId))
+        ?.nome || null
+    );
+  };
+
+  const handleToggleLembrete = (lembrete: any) => {
+    if (!categoria) return;
+    const lembreteId = String(lembrete.id);
+    const checked = selectedLembreteIds.includes(lembreteId);
+    const categoriaAtualId = lembrete.categoria_id;
+    const pertenceOutraCategoria =
+      categoriaAtualId &&
+      String(categoriaAtualId) !== String(categoria.id);
+
+    if (checked) {
+      setSelectedLembreteIds((prev) =>
+        prev.filter((id) => id !== lembreteId)
+      );
+      return;
+    }
+
+    if (pertenceOutraCategoria) {
+      const nomeCategoriaAtual =
+        getCategoriaNome(categoriaAtualId) || 'outra categoria';
+      Alert.alert(
+        'Mover lembrete?',
+        `Este lembrete ja pertence a "${nomeCategoriaAtual}". Um lembrete so pode ter 1 categoria. Mover para "${categoria.nome}"?`,
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Mover',
+            onPress: () =>
+              setSelectedLembreteIds((prev) => [...prev, lembreteId]),
+          },
+        ]
+      );
+      return;
+    }
+
+    setSelectedLembreteIds((prev) => [...prev, lembreteId]);
+  };
 
   // --- SAVE ---
   const handleSave = async () => {
@@ -161,20 +207,26 @@ const EditCategoriaScreen: React.FC = () => {
 
         {lembretes.map((l) => {
           const checked = selectedLembreteIds.includes(String(l.id));
+          const categoriaAtualNome =
+            l.categoria_id &&
+            String(l.categoria_id) !== String(categoria.id)
+              ? getCategoriaNome(l.categoria_id)
+              : null;
 
           return (
             <TouchableOpacity
               key={l.id}
               style={styles.lembreteRow}
-              onPress={() => {
-                setSelectedLembreteIds((prev) =>
-                  checked
-                    ? prev.filter((id) => id !== String(l.id))
-                    : [...prev, String(l.id)]
-                );
-              }}
+              onPress={() => handleToggleLembrete(l)}
             >
-              <Text style={styles.lembreteText}>{l.titulo}</Text>
+              <View style={styles.lembreteInfo}>
+                <Text style={styles.lembreteText}>{l.titulo}</Text>
+                {categoriaAtualNome && !checked && (
+                  <Text style={styles.lembreteSubtext}>
+                    Categoria atual: {categoriaAtualNome}
+                  </Text>
+                )}
+              </View>
               <Ionicons
                 name={checked ? 'checkbox' : 'square-outline'}
                 size={22}
@@ -253,8 +305,19 @@ const styles = StyleSheet.create({
     borderBottomColor: '#222',
   },
 
+  lembreteInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+
   lembreteText: {
     color: '#fff',
     fontSize: 15,
+  },
+
+  lembreteSubtext: {
+    color: '#888',
+    fontSize: 12,
+    marginTop: 2,
   },
 });
