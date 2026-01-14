@@ -28,7 +28,9 @@ const EditLembreteScreen = () => {
   // --- ESTADOS ---
   const [titulo, setTitulo] = useState(lembrete.titulo);
   const [descricao, setDescricao] = useState(lembrete.descricao || '');
-  const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [selectedListId, setSelectedListId] = useState<string | null>(
+    lembrete.lista_id != null ? String(lembrete.lista_id) : null
+  );
   const [selectedCatId, setSelectedCatId] = useState<string | null>(null);
   
   // Prioridade
